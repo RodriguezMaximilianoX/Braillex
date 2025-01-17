@@ -5,6 +5,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.rmxdev.braillex.data.repository.UserRepositoryImpl
+import com.rmxdev.braillex.domain.repository.UserRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,4 +30,18 @@ object AppModule {
         Log.d("FirestoreModule", "Firestore instance provided")
         return FirebaseFirestore.getInstance()
     }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        auth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): UserRepository {
+        Log.d("AppModule", "UserRepositoryImpl instance provided")
+        return UserRepositoryImpl(auth, firestore)
+    }
+
+    @Provides
+    @Singleton
+
 }

@@ -40,7 +40,7 @@ import com.rmxdev.braillex.ui.theme.White
 fun AccountScreen(
     modifier: Modifier = Modifier,
     navigateToLogin: () -> Unit,
-    navigateToSignup: () -> Unit,
+    navigateToEmail: () -> Unit,
     navigateToHelp: () -> Unit,
     backButton: () -> Unit
 ) {
@@ -113,7 +113,7 @@ fun AccountScreen(
             Text(text = "Iniciar sesión", fontSize = 20.sp, color = White)
         }
         Button(
-            onClick = { navigateToSignup() },
+            onClick = { navigateToEmail() },
             colors = buttonColors(containerColor = White, contentColor = Blue),
             border = BorderStroke(2.dp, Blue),
             modifier = Modifier

@@ -1,4 +1,4 @@
-package com.rmxdev.braillex.presenter.login
+package com.rmxdev.braillex.presenter.signup
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -49,17 +49,16 @@ import com.rmxdev.braillex.ui.theme.TextFieldColor
 import com.rmxdev.braillex.ui.theme.White
 
 @Composable
-fun LoginScreen(
+fun SignupScreen(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: SignupViewModel = hiltViewModel(),
+    userEmail: String,
     backButton: () -> Unit,
-    navigateToEmail: () -> Unit,
     navigateToHelp: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
 
-    val loginState by viewModel.loginState.collectAsState()
-    var email by rememberSaveable { mutableStateOf("") }
+    val signupState by viewModel.signupState.collectAsState()
     var password by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
 
@@ -94,16 +93,16 @@ fun LoginScreen(
         }
         Spacer(modifier = Modifier.weight(0.5f))
         Text(
-            text = "Iniciar sesión",
+            text = "Crea una contraseña",
             fontSize = 20.sp,
             color = DarkBlack,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.weight(0.5f))
         TextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            value = userEmail,
+            onValueChange = {},
+            enabled = false,
             modifier = Modifier
                 .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 .fillMaxWidth()
@@ -114,14 +113,16 @@ fun LoginScreen(
                 focusedTextColor = DarkBlack,
                 unfocusedTextColor = DarkBlack,
                 focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledTextColor = DarkBlack,
+                disabledIndicatorColor = Color.Transparent
             ),
             maxLines = 1
         )
         TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Contraseña") },
+            label = { Text(text = "Agrega una contraseña")},
             modifier = Modifier
                 .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 .fillMaxWidth()
@@ -137,38 +138,36 @@ fun LoginScreen(
             maxLines = 1
         )
         Button(
-            onClick = { viewModel.loginUser(email, password) },
+            onClick = { viewModel.registerUser(userEmail, password) },
             colors = buttonColors(containerColor = Blue),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
                 .height(50.dp)
         ) {
-            Text(text = "Iniciar sesión", fontSize = 25.sp, color = White, fontWeight = FontWeight.Bold)
-        }
-        TextButton(onClick = { navigateToEmail() }) {
-            Text(text = "¿No tienes una cuenta?", fontSize = 20.sp, color = Blue)
+            Text(text = "Siguiente", fontSize = 25.sp, color = White, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.weight(2f))
         TextButton(onClick = { navigateToHelp() }) {
             Text(text = "¿Necesitas ayuda?", fontSize = 15.sp, color = BarColor)
         }
 
-        when(loginState){
-            is LoginState.Loading -> {
+        when(signupState){
+            is SignUpState.Loading -> {
                 CircularProgressIndicator()
             }
-            is LoginState.Success -> {
+            is SignUpState.Success -> {
                 onLoginSuccess()
             }
-            is LoginState.Error -> {
-                LaunchedEffect(loginState) {
+            is SignUpState.Error -> {
+                LaunchedEffect(signupState) {
                     Toast.makeText(
-                        context, "Usuario o contraseña incorrecta", Toast.LENGTH_LONG
+                        context, "Error al crear usuario", Toast.LENGTH_LONG
                     ).show()
                 }
             }
             else -> {}
         }
+
     }
 }
