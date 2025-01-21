@@ -50,6 +50,7 @@ fun TitleScreen(
     pdfUri: String
 ) {
     var title by remember { mutableStateOf("") }
+   // val pdfUriDecode = Uri.decode(pdfUri)
 
     Column(
         modifier = modifier
@@ -108,8 +109,28 @@ fun TitleScreen(
             ),
             maxLines = 1
         )
+        TextField(
+            value = pdfUri,
+            onValueChange = { },
+            enabled = false,
+            modifier = Modifier
+                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth()
+                .clip(CircleShape),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = TextFieldColor,
+                focusedContainerColor = TextFieldColor,
+                focusedTextColor = DarkBlack,
+                unfocusedTextColor = DarkBlack,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledTextColor = DarkBlack,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            maxLines = 1
+        )
         Spacer(modifier = Modifier.weight(0.25f))
-        Button(onClick = { navigateToUpload(Uri.encode(pdfUri), Uri.encode(title)) },
+        Button(onClick = { navigateToUpload(Uri.encode(pdfUri), title) },
             colors = buttonColors(containerColor = Blue),
             modifier = Modifier
                 .fillMaxWidth()

@@ -24,7 +24,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,10 +50,9 @@ fun NewFileScreen(
     pdfTitle: String,
     pdfUri: String,
 
-) {
+    ) {
     val newFileState = viewModel.newFileState.collectAsState()
-    val decodeUri = pdfUri.let { Uri.decode(it) }
-    val decodeTitle = pdfTitle.let { Uri.decode(it) }
+    val pdfUriDecode = Uri.decode(pdfUri)
 
     Column(
         modifier = modifier
@@ -115,6 +113,27 @@ fun NewFileScreen(
             ),
             maxLines = 1
         )
+        TextField(
+            value = pdfUriDecode,
+            onValueChange = { },
+            enabled = false,
+            modifier = Modifier
+                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+                .fillMaxWidth()
+                .clip(CircleShape),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = TextFieldColor,
+                focusedContainerColor = TextFieldColor,
+                focusedTextColor = DarkBlack,
+                unfocusedTextColor = DarkBlack,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledTextColor = DarkBlack,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            maxLines = 1
+        )
+
         Spacer(modifier = Modifier.weight(0.25f))
         Button(
             onClick = { viewModel.processPdf(pdfUri, pdfTitle) },
@@ -132,12 +151,15 @@ fun NewFileScreen(
             is NewFileState.Loading -> {
                 CircularProgressIndicator()
             }
+
             is NewFileState.Success -> {
                 navigateToFiles()
             }
+
             is NewFileState.Error -> {
                 Text(text = "Error: ${(newFileState as NewFileState.Error).message}")
             }
+
             else -> {}
         }
     }

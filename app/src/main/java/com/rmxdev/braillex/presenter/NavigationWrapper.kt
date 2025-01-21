@@ -1,5 +1,6 @@
 package com.rmxdev.braillex.presenter
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -20,7 +21,7 @@ fun NavigationWrapper(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
-    NavHost(navController = navController, startDestination = "files", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "initial", modifier = modifier) {
         composable("initial") {
             InitialScreen(
                 modifier = Modifier,
@@ -43,7 +44,7 @@ fun NavigationWrapper(
                 backButton = { navController.popBackStack() },
                 navigateToEmail = { navController.navigate("userEmail") },
                 navigateToHelp = { navController.navigate("help") },
-                onLoginSuccess = { navController.navigate("initial") }
+                onLoginSuccess = { navController.navigate("files") }
             )
         }
         composable("userEmail") {
@@ -75,6 +76,7 @@ fun NavigationWrapper(
                 navigateToPdfTitle = {
                     val pdfUri = it
                     navController.navigate("titleScreen/$pdfUri")
+                    Log.d("UriCheck Navigation", "Length: ${pdfUri.length}, Uri: $pdfUri")
                 }
             )
         }
@@ -87,7 +89,7 @@ fun NavigationWrapper(
                 navigateToUpload = { pdfTitle, pdfUri ->
                     val pdfTitle = pdfTitle
                     val pdfUri = pdfUri
-                    navController.navigate("newFile/$pdfTitle/$pdfUri")
+                    navController.navigate("newFile/$pdfUri/$pdfTitle")
                 },
                 pdfUri = pdfUri ?: "",
             )

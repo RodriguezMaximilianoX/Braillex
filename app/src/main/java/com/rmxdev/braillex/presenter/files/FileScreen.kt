@@ -2,6 +2,7 @@ package com.rmxdev.braillex.presenter.files
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -27,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,11 +49,16 @@ fun FileScreen(
     val state = viewModel.fileState.collectAsState()
 
     // Definir el lanzador fuera del botón
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        result.data?.data?.let { uri ->
-            navigateToPdfTitle(Uri.encode(uri.toString()))
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result.data?.data?.let { uri ->
+                Log.d("UriCheck", "Uri: $uri")
+                val encodedUri = Uri.encode(uri.toString())
+                val safeUri = encodedUri.replace("/", "%2F")
+                Log.d("UriParsedCheck", "Length: ${safeUri.length}, Uri: $safeUri")
+                navigateToPdfTitle(safeUri)
+            }
         }
-    }
 
     Column(
         modifier = modifier
@@ -99,11 +104,13 @@ fun FileScreen(
 
         IconButton(
             onClick = {
+                Log.d("Button pressed", "Button pressed")
                 val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/pdf"
                 }
                 launcher.launch(intent)
+                Log.d("Intent Data", "Intent size: ${intent.extras?.size()}")
             },
             modifier = Modifier
                 .size(70.dp)
@@ -124,14 +131,16 @@ fun FileScreen(
 
     }
 
-    when(state.value){
+    when (state.value) {
         is FileState.Error -> {
             val errorMessage = (state.value as FileState.Error).message
             Text(text = errorMessage)
         }
+
         FileState.Loading -> {
             CircularProgressIndicator()
         }
+
         is FileState.Success -> {
             val files = (state.value as FileState.Success).files
             LazyColumn {
@@ -140,6 +149,7 @@ fun FileScreen(
                 }
             }
         }
+
         else -> {}
     }
 }
