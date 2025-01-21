@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
     //Dagger Hilt
     implementation(libs.dagger.hilt)
@@ -78,6 +79,16 @@ dependencies {
 
     //SystemUiController
     implementation(libs.system.ui.controller)
+
+    //PdfBox
+    implementation(libs.pdfbox)
+
+    //Zxing
+    implementation(libs.zxing)
+    implementation(libs.journeyapp)
+
+    //Media
+    implementation(libs.media)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
