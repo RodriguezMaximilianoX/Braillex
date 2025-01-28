@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.rmxdev.braillex"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.rmxdev.braillex"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -80,8 +80,8 @@ dependencies {
     //SystemUiController
     implementation(libs.system.ui.controller)
 
-    //PdfBox
-    implementation(libs.pdfbox)
+    //Itext
+    implementation(libs.itext)
 
     //Zxing
     implementation(libs.zxing)
@@ -89,6 +89,12 @@ dependencies {
 
     //Media
     implementation(libs.media)
+
+    //Gson
+    implementation(libs.gson)
+
+    //Coil
+    implementation(libs.coil)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

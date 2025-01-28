@@ -1,5 +1,6 @@
 package com.rmxdev.braillex.presenter
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -7,21 +8,26 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
+import com.rmxdev.braillex.domain.entities.PdfFile
 import com.rmxdev.braillex.presenter.account.AccountScreen
 import com.rmxdev.braillex.presenter.email.EmailScreen
 import com.rmxdev.braillex.presenter.files.FileScreen
 import com.rmxdev.braillex.presenter.initial.InitialScreen
 import com.rmxdev.braillex.presenter.login.LoginScreen
+import com.rmxdev.braillex.presenter.media.MediaScreen
 import com.rmxdev.braillex.presenter.newFile.NewFileScreen
 import com.rmxdev.braillex.presenter.newFile.TitleScreen
+import com.rmxdev.braillex.presenter.reproductor.ReproductorScreen
 import com.rmxdev.braillex.presenter.signup.SignupScreen
 
 @Composable
 fun NavigationWrapper(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    gson: Gson
 ) {
-    NavHost(navController = navController, startDestination = "initial", modifier = modifier) {
+    NavHost(navController = navController, startDestination = "files", modifier = modifier) {
         composable("initial") {
             InitialScreen(
                 modifier = Modifier,
@@ -102,11 +108,33 @@ fun NavigationWrapper(
                 modifier = Modifier,
                 navigateToInitial = { navController.navigate("initial") },
                 navigateToHelp = { navController.navigate("help") },
-                navigateToFiles = { navController.navigate("files") },
+                navigateToReproductor = {
+                    val pdfFileJson = Uri.encode(gson.toJson(it))
+                    navController.navigate("reproductor/$pdfFileJson")
+                },
                 pdfTitle = pdfTitle ?: "",
                 pdfUri = pdfUri ?: ""
             )
         }
-
+        composable("reproductor/{pdfFile}") { backStackEntry ->
+            val pdfFileJson = backStackEntry.arguments?.getString("pdfFile")
+            val pdfFile = gson.fromJson(Uri.decode(pdfFileJson), PdfFile::class.java)
+            ReproductorScreen(
+                modifier = Modifier,
+                navigateToInitial = { navController.navigate("initial") },
+                pdfFile = pdfFile,
+                navigateToMedia = { audioUrl ->
+                    navController.navigate("media/$audioUrl")
+                }
+            )
+        }
+        composable("media/{audioUrl}") { backStackEntry ->
+            val audioUrl = backStackEntry.arguments?.getString("audioUrl")
+            MediaScreen(
+                modifier = Modifier,
+                backButton = { navController.popBackStack() },
+                audioUrl = audioUrl ?: ""
+            )
+        }
     }
 }

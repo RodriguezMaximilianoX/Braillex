@@ -1,21 +1,23 @@
 package com.rmxdev.braillex.data.di
 
 import android.content.Context
+import android.media.MediaPlayer
+import android.media.MediaRecorder
+import android.provider.MediaStore.Audio.Media
 import android.util.Log
+import coil.ImageLoader
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.zxing.qrcode.QRCodeWriter
+import com.google.gson.Gson
 import com.rmxdev.braillex.data.network.AndroidTextToSpeechGenerator
 import com.rmxdev.braillex.data.network.QrCodeGenerator
 import com.rmxdev.braillex.data.repository.FileRepositoryImpl
 import com.rmxdev.braillex.data.repository.UserRepositoryImpl
 import com.rmxdev.braillex.domain.repository.FileRepository
 import com.rmxdev.braillex.domain.repository.UserRepository
-import com.tom_roush.pdfbox.pdfparser.PDFParser
-import com.tom_roush.pdfbox.text.PDFTextStripper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -58,24 +60,30 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideTextToSpeechGenerator(@ApplicationContext context: Context): AndroidTextToSpeechGenerator {
-        return AndroidTextToSpeechGenerator(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideQrCodeGenerator(): QrCodeGenerator {
-        return QrCodeGenerator()
-    }
-
-    @Provides
-    @Singleton
     fun provideFileRepository(
         firestore: FirebaseFirestore,
         storage: FirebaseStorage,
         textToSpeech: AndroidTextToSpeechGenerator,
         qrCodeGenerator: QrCodeGenerator
-    ): FileRepository{
+    ): FileRepository {
         return FileRepositoryImpl(firestore, storage, textToSpeech, qrCodeGenerator)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMedia(): MediaPlayer{
+        return MediaPlayer()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson{
+        return Gson()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCoil(@ApplicationContext context: Context): ImageLoader {
+        return ImageLoader.Builder(context).build()
     }
 }

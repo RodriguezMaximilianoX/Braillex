@@ -18,13 +18,7 @@ class FileViewModel @Inject constructor(
     val fileState: StateFlow<FileState> = _fileState
 
     fun fetchListFiles(){
-        viewModelScope.launch {
-            _fileState.value = FileState.Loading
-            _fileState.value = listFiles().fold(
-                onSuccess = { FileState.Success(it) },
-                onFailure = { FileState.Error(it.message ?: "Unknown error") }
-            )
-        }
+
     }
 
 }

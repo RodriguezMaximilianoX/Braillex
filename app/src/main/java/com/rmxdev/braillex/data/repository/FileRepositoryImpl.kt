@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.rmxdev.braillex.data.network.AndroidTextToSpeechGenerator
@@ -17,38 +18,42 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FileRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val textToSpeech: AndroidTextToSpeechGenerator,
-    private val qrCodeGenerator: QrCodeGenerator
+    private val textToSpeech: AndroidTextToSpeechGenerator
 ) : FileRepository {
 
     override suspend fun uploadPdfAndGeneratedAudio(fileUri: Uri, title: String, context: Context): Result<PdfFile> {
         return try {
-            // Obtener el archivo desde la URI proporcionada
             val file = File(fileUri.path ?: throw IllegalArgumentException("Invalid file URI"))
-
-            // Obtener la URI local del archivo
             val localUri = getFileUri(file, context)
 
             // Subir el archivo PDF a Firebase Storage
             val pdfRef = storage.reference.child("pdfs/${UUID.randomUUID()}.pdf")
-            pdfRef.putFile(localUri).await()
+            val pdfUploadTask = pdfRef.putFile(localUri).await()
+            val pdfUrl = pdfRef.downloadUrl.await().toString()
 
-            // Generar el audio a partir del PDF
-            val audioUrl = textToSpeech.generateAudioFromPdf(localUri)
+            // Llamada a la generación de audio utilizando suspendCoroutine para esperar el resultado
+            val audioFile = suspendCoroutine<String> { continuation ->
+                textToSpeech.generateAudioFromPdf(pdfUrl) { result ->
+                    continuation.resume(result)
+                }
+            }
 
-            // Generar el código QR para el audio
-            val qrCodeUrl = qrCodeGenerator.generateQrCode(audioUrl)
+            // Subir el archivo de audio a Firebase Storage en la carpeta "pdfsAudio"
+            val audioRef = storage.reference.child("pdfsAudio/${UUID.randomUUID()}.mp3")
+            audioRef.putFile(audioFile.toUri()).await()
+            val audioUrl = audioRef.downloadUrl.await().toString()
 
             // Guardar los datos en Firestore
             val pdfFile = PdfFile(
                 id = UUID.randomUUID().toString(),
                 title = title,
-                audioUrl = audioUrl,
-                qrCodeUrl = qrCodeUrl
+                audioUrl = audioUrl
             )
             firestore.collection("generated_files").document(pdfFile.id).set(pdfFile).await()
 
@@ -58,13 +63,12 @@ class FileRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGeneratedFiles(): Result<List<PdfFile>> {
+    override suspend fun getGeneratedFiles(fileId: String): Result<PdfFile> {
         return try {
-            val snapshot = firestore.collection("generated_files").get().await()
-            val files =
-                snapshot.documents.map { document -> document.toObject(PdfFile::class.java)!! }
+            val snapshot = firestore.collection("generated_files").document(fileId).get().await()
+            val pdfFile = snapshot.toObject(PdfFile::class.java) ?: throw Exception("Archivo no encontrado")
 
-            Result.success(files)
+            Result.success(pdfFile)
         } catch (e: Exception) {
             Result.failure(e)
         }

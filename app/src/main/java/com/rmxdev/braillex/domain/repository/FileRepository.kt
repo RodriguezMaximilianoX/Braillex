@@ -8,7 +8,7 @@ import java.io.InputStream
 
 interface FileRepository {
     suspend fun uploadPdfAndGeneratedAudio(fileUri: Uri, title: String, context: Context): Result<PdfFile>
-    suspend fun getGeneratedFiles(): Result<List<PdfFile>>
+    suspend fun getGeneratedFiles(fileId: String): Result<PdfFile>
     fun getFileUri(file: File, context: Context): Uri
     fun getFileFromUri(context: Context, uri: Uri): File
     fun copyStream(inputStream: InputStream, outputFile: File)

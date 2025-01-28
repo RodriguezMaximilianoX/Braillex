@@ -8,7 +8,7 @@ class GetGeneratedFilesUseCase @Inject constructor(
     val repository: FileRepository
 ){
     // Obtener la lista de archivos generados desde Firestore
-    suspend operator fun invoke(): Result<List<PdfFile>>{
-        return repository.getGeneratedFiles()
+    suspend operator fun invoke(fileId: String): Result<PdfFile>{
+        return repository.getGeneratedFiles(fileId)
     }
 }

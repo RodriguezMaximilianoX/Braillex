@@ -4,10 +4,16 @@ import android.content.Context
 import android.net.Uri
 import android.speech.tts.TextToSpeech
 import android.util.Log
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfReader
+import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.net.URL
 import javax.inject.Inject
 
 class AndroidTextToSpeechGenerator @Inject constructor(
@@ -22,26 +28,37 @@ class AndroidTextToSpeechGenerator @Inject constructor(
         }
     }
 
-    fun generateAudioFromPdf(fileUri: Uri): String {
-        val text = extractTextFromPdf(fileUri)
-
-        // Convertir el texto a audio y guardar en almacenamiento local
-        val audioFile = File(context.cacheDir, "output_audio.mp3")
-        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
-
-        // Retornar la URI del archivo de audio generado
-        return audioFile.toURI().toString()
+    fun generateAudioFromPdf(fileUrl: String, onComplete: (String) -> Unit) {
+        Log.d("TTS", "Generating audio from PDF")
+        CoroutineScope(Dispatchers.IO).launch {
+            val text = extractTextFromPdf(fileUrl)
+            withContext(Dispatchers.Main) {
+                textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+                val audioFile = File(context.cacheDir, "output_audio.mp3")
+                onComplete(audioFile.toURI().toString())
+            }
+        }
     }
 
-    private fun extractTextFromPdf(fileUri: Uri): String {
-        val pdfDocument = PDDocument.load(context.contentResolver.openInputStream(fileUri))
-        val pdfText = PDFTextStripper().getText(pdfDocument)
+    private fun extractTextFromPdf(fileUrl: String): String {
+        Log.d("TTS", "Extracting text from PDF URL")
+        val url = URL(fileUrl)
+        val connection = url.openConnection()
+        val inputStream = connection.getInputStream()
+        val reader = PdfReader(inputStream)
+        val pdfDocument = PdfDocument(reader)
+        val text = StringBuilder()
+
+        for (i in 1..pdfDocument.numberOfPages) {
+            val page = pdfDocument.getPage(i)
+            text.append(PdfTextExtractor.getTextFromPage(page))
+        }
+
         pdfDocument.close()
-        return pdfText
+        return text.toString()
     }
 
     fun shutdown() {
         textToSpeech.shutdown()
     }
-
 }

@@ -30,20 +30,16 @@ class NewFileVewModel @Inject constructor(
         val uri = Uri.parse(fileUri)
         val file = getFileFromUri(applicationContext, uri) // Obtener el archivo con getFileFromUri
 
-        if (file != null) {
-            val fileUriToUpload = getFileFromUri(applicationContext, uri) // Obtener la URI para subir el archivo
+        val fileUriToUpload = getFileFromUri(applicationContext, uri) // Obtener la URI para subir el archivo
 
-            viewModelScope.launch {
-                _newFileState.value = NewFileState.Loading
-                val uriToUpload = getFileUri(fileUriToUpload, applicationContext)
-                val result = uploadPdf(uriToUpload, title, applicationContext)
-                _newFileState.value = result.fold(
-                    onSuccess = { NewFileState.Success(it) },
-                    onFailure = { NewFileState.Error(it.message ?: "Unknown error") }
-                )
-            }
-        } else {
-            _newFileState.value = NewFileState.Error("Error al obtener el archivo")
+        viewModelScope.launch {
+            _newFileState.value = NewFileState.Loading
+            val uriToUpload = getFileUri(fileUriToUpload, applicationContext)
+            val result = uploadPdf(uriToUpload, title, applicationContext)
+            _newFileState.value = result.fold(
+                onSuccess = { NewFileState.Success(it) },
+                onFailure = { NewFileState.Error(it.message ?: "Unknown error") }
+            )
         }
     }
 
