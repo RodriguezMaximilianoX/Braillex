@@ -1,6 +1,7 @@
 package com.rmxdev.braillex.presenter.newFile
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,11 +47,11 @@ fun TitleScreen(
     modifier: Modifier = Modifier,
     navigateToInitial: () -> Unit,
     navigateToHelp: () -> Unit,
-    navigateToUpload: (String, String) -> Unit,
-    pdfUri: String
+    navigateToUpload: (Uri, String) -> Unit,
+    fileUri: Uri
 ) {
-    var title by remember { mutableStateOf("") }
-   // val pdfUriDecode = Uri.decode(pdfUri)
+
+    var title by rememberSaveable { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -93,11 +94,15 @@ fun TitleScreen(
         Spacer(modifier = Modifier.weight(0.25f))
         TextField(
             value = title,
-            onValueChange = { title = it },
+            onValueChange = {
+                title = it
+                Log.d("TitleScreen", "Nuevo título: $title")
+            },
             label = { Text("Título") },
             modifier = Modifier
-                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 .fillMaxWidth()
+                .height(56.dp)
+                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                 .clip(CircleShape),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = TextFieldColor,
@@ -110,7 +115,8 @@ fun TitleScreen(
             maxLines = 1
         )
         Spacer(modifier = Modifier.weight(0.25f))
-        Button(onClick = { navigateToUpload(Uri.encode(pdfUri), title) },
+        Button(
+            onClick = { navigateToUpload(fileUri, title) },
             colors = buttonColors(containerColor = Blue),
             modifier = Modifier
                 .fillMaxWidth()

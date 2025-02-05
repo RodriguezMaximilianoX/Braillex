@@ -61,12 +61,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFileRepository(
+        @ApplicationContext context: Context,
         firestore: FirebaseFirestore,
         storage: FirebaseStorage,
-        textToSpeech: AndroidTextToSpeechGenerator,
-        qrCodeGenerator: QrCodeGenerator
+        textToSpeech: AndroidTextToSpeechGenerator
     ): FileRepository {
-        return FileRepositoryImpl(firestore, storage, textToSpeech, qrCodeGenerator)
+        return FileRepositoryImpl(context, storage, firestore, textToSpeech)
     }
 
     @Provides

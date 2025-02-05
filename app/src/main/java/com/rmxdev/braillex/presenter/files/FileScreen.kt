@@ -1,8 +1,6 @@
 package com.rmxdev.braillex.presenter.files
 
-import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -14,16 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,20 +41,14 @@ fun FileScreen(
     viewModel: FileViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit,
     navigateToHelp: () -> Unit,
-    navigateToPdfTitle: (String) -> Unit
+    onFileSelected: (Uri) -> Unit
 ) {
-    val state = viewModel.fileState.collectAsState()
+    val selectedFile by viewModel.selectedFile.collectAsState()
 
     // Definir el lanzador fuera del botón
     val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            result.data?.data?.let { uri ->
-                Log.d("UriCheck", "Uri: $uri")
-                val encodedUri = Uri.encode(uri.toString())
-                val safeUri = encodedUri.replace("/", "%2F")
-                Log.d("UriParsedCheck", "Length: ${safeUri.length}, Uri: $safeUri")
-                navigateToPdfTitle(safeUri)
-            }
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) { uri ->
+            uri?.let { viewModel.selectFile(it) }
         }
 
     Column(
@@ -103,15 +94,7 @@ fun FileScreen(
         Spacer(modifier = Modifier.weight(2f))
 
         IconButton(
-            onClick = {
-                Log.d("Button pressed", "Button pressed")
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/pdf"
-                }
-                launcher.launch(intent)
-                Log.d("Intent Data", "Intent size: ${intent.extras?.size()}")
-            },
+            onClick = { launcher.launch(arrayOf("application/pdf")) },
             modifier = Modifier
                 .size(70.dp)
                 .clip(CircleShape)
@@ -125,31 +108,14 @@ fun FileScreen(
                     .padding(8.dp)
                     .size(30.dp)
             )
+            selectedFile?.let {
+                Text(text = "Archivo seleccionado: ${it.lastPathSegment}")
+                // Navegar a la TitleScreen pasando la URI (por ejemplo, como String)
+                onFileSelected(it)
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-    }
-
-    when (state.value) {
-        is FileState.Error -> {
-            val errorMessage = (state.value as FileState.Error).message
-            Text(text = errorMessage)
-        }
-
-        FileState.Loading -> {
-            CircularProgressIndicator()
-        }
-
-        is FileState.Success -> {
-            val files = (state.value as FileState.Success).files
-            LazyColumn {
-                items(files.size) { file ->
-                    Text(files[file].title)
-                }
-            }
-        }
-
-        else -> {}
     }
 }

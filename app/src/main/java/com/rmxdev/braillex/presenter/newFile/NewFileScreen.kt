@@ -23,7 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,16 +46,15 @@ import com.rmxdev.braillex.ui.theme.White
 @Composable
 fun NewFileScreen(
     modifier: Modifier = Modifier,
-    viewModel: NewFileVewModel = hiltViewModel(),
+    viewModel: NewFileViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit,
     navigateToHelp: () -> Unit,
     navigateToReproductor: (file: PdfFile) -> Unit,
     pdfTitle: String,
-    pdfUri: String,
+    pdfUri: Uri,
 
     ) {
-    val newFileState = viewModel.newFileState.collectAsState()
-    val pdfUriDecode = Uri.decode(pdfUri)
+    val uploadResult by viewModel.pdfFile.collectAsState()
 
     Column(
         modifier = modifier
@@ -115,7 +116,7 @@ fun NewFileScreen(
             maxLines = 1
         )
         TextField(
-            value = pdfUriDecode,
+            value = pdfUri.toString(),
             onValueChange = { },
             enabled = false,
             modifier = Modifier
@@ -137,7 +138,7 @@ fun NewFileScreen(
 
         Spacer(modifier = Modifier.weight(0.25f))
         Button(
-            onClick = { viewModel.processPdf(pdfUri, pdfTitle) },
+            onClick = { viewModel.uploadFile(pdfUri, pdfTitle) },
             colors = buttonColors(containerColor = Blue),
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,21 +149,13 @@ fun NewFileScreen(
         }
         Spacer(modifier = Modifier.weight(4f))
 
-        when (newFileState.value) {
-            is NewFileState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            is NewFileState.Success -> {
-                val pdfFile = (newFileState.value as NewFileState.Success).files
+        uploadResult?.onSuccess { pdfFile ->
+            LaunchedEffect(pdfFile) {
                 navigateToReproductor(pdfFile)
             }
-
-            is NewFileState.Error -> {
-                Text(text = "Error: ${(newFileState as NewFileState.Error).message}")
-            }
-
-            else -> {}
+        }
+        uploadResult?.onFailure {
+            Text("Error al subir el archivo: ${it.localizedMessage}")
         }
     }
 }

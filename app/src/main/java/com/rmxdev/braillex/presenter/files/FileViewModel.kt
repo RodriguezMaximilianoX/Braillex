@@ -1,24 +1,18 @@
 package com.rmxdev.braillex.presenter.files
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.rmxdev.braillex.domain.useCase.getGeneratedFilesUseCase.GetGeneratedFilesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FileViewModel @Inject constructor(
-    private val listFiles: GetGeneratedFilesUseCase
-) : ViewModel() {
+class FileViewModel @Inject constructor() : ViewModel() {
+    private val _selectedFile = MutableStateFlow<Uri?>(null)
+    val selectedFile: StateFlow<Uri?> = _selectedFile
 
-    private val _fileState = MutableStateFlow<FileState>(FileState.Idle)
-    val fileState: StateFlow<FileState> = _fileState
-
-    fun fetchListFiles(){
-
+    fun selectFile(uri: Uri) {
+        _selectedFile.value = uri
     }
-
 }

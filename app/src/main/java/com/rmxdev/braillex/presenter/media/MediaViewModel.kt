@@ -1,43 +1,51 @@
 package com.rmxdev.braillex.presenter.media
 
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.rmxdev.braillex.domain.entities.PdfFile
-import com.rmxdev.braillex.domain.useCase.getGeneratedFilesUseCase.GetGeneratedFilesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MediaViewModel @Inject constructor(
-    private val generatedFile: GetGeneratedFilesUseCase,
-    private val mediaPlayer: MediaPlayer,
-): ViewModel() {
+    private val mediaPlayer: MediaPlayer
+) : ViewModel() {
 
-    private val _mediaState = MutableStateFlow<MediaState>(MediaState.Loading)
-    val mediaState: StateFlow<MediaState> = _mediaState
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying: StateFlow<Boolean> = _isPlaying
 
-    fun loadFile(audioUrl: String){
-        viewModelScope.launch {
-            generatedFile(audioUrl).onSuccess {
-                _mediaState.value = MediaState.Success(audioUrl)
-                playAudio(audioUrl)
-            }.onFailure {
-                _mediaState.value = MediaState.Error(it.message ?: "Error desconocido")
+    fun playAudio(audioUrl: String) {
+        try {
+            mediaPlayer.reset()
+            mediaPlayer.setDataSource(audioUrl)
+            mediaPlayer.prepareAsync()
+            mediaPlayer.setOnPreparedListener {
+                it.start()
+                _isPlaying.value = true
             }
+        } catch (e: Exception) {
+            Log.e("MediaViewModel", "Error playing audio: ${e.localizedMessage}")
         }
     }
 
-    fun playAudio(audioUrl: String){
-        mediaPlayer.reset()
-        mediaPlayer.setDataSource(audioUrl)
-        mediaPlayer.prepareAsync()
-        mediaPlayer.setOnPreparedListener { it.start() }
-        mediaPlayer.setOnCompletionListener { it.release() }
-        mediaPlayer.setOnErrorListener { _, _, _ -> false }
+    fun pauseAudio() {
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.pause()
+            _isPlaying.value = false
+        }
     }
 
+    fun stopAudio() {
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.stop()
+            _isPlaying.value = false
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaPlayer.release()
+    }
 }

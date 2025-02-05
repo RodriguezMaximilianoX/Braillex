@@ -1,7 +1,6 @@
 package com.rmxdev.braillex.presenter
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -25,9 +24,10 @@ import com.rmxdev.braillex.presenter.signup.SignupScreen
 fun NavigationWrapper(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    gson: Gson
+    gson: Gson,
+    startDestination: String
 ) {
-    NavHost(navController = navController, startDestination = "files", modifier = modifier) {
+    NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         composable("initial") {
             InitialScreen(
                 modifier = Modifier,
@@ -79,31 +79,34 @@ fun NavigationWrapper(
                 modifier = Modifier,
                 navigateToInitial = { navController.navigate("initial") },
                 navigateToHelp = { navController.navigate("help") },
-                navigateToPdfTitle = {
-                    val pdfUri = it
-                    navController.navigate("titleScreen/$pdfUri")
-                    Log.d("UriCheck Navigation", "Length: ${pdfUri.length}, Uri: $pdfUri")
+                onFileSelected = { pdfUri ->
+                    val encodedUri = Uri.encode(pdfUri.toString())
+                    navController.navigate("titleScreen/$encodedUri")
                 }
             )
         }
         composable("titleScreen/{pdfUri}") { backStackEntry ->
-            val pdfUri = backStackEntry.arguments?.getString("pdfUri")
-            TitleScreen(
-                modifier = Modifier,
-                navigateToInitial = { navController.navigate("initial") },
-                navigateToHelp = { navController.navigate("help") },
-                navigateToUpload = { pdfTitle, pdfUri ->
-                    val pdfTitle = pdfTitle
-                    val pdfUri = pdfUri
-                    navController.navigate("newFile/$pdfUri/$pdfTitle")
-                },
-                pdfUri = pdfUri ?: "",
-            )
+            val fileUriStr = backStackEntry.arguments?.getString("pdfUri")
+            val fileUri = fileUriStr?.let { Uri.parse(Uri.decode(it)) }
+
+            fileUri?.let {
+                TitleScreen(
+                    modifier = Modifier,
+                    navigateToInitial = { navController.navigate("initial") },
+                    navigateToHelp = { navController.navigate("help") },
+                    navigateToUpload = { pdfUri, pdfTitle ->
+                        val encodedUri = Uri.encode(pdfUri.toString())
+                        navController.navigate("newFile/$pdfTitle/$encodedUri")
+                    },
+                    fileUri = it
+                )
+            }
         }
 
         composable("newFile/{pdfTitle}/{pdfUri}") { backStackEntry ->
             val pdfTitle = backStackEntry.arguments?.getString("pdfTitle")
             val pdfUri = backStackEntry.arguments?.getString("pdfUri")
+            val fileUri = Uri.parse(pdfUri)
             NewFileScreen(
                 modifier = Modifier,
                 navigateToInitial = { navController.navigate("initial") },
@@ -113,7 +116,7 @@ fun NavigationWrapper(
                     navController.navigate("reproductor/$pdfFileJson")
                 },
                 pdfTitle = pdfTitle ?: "",
-                pdfUri = pdfUri ?: ""
+                pdfUri = fileUri
             )
         }
         composable("reproductor/{pdfFile}") { backStackEntry ->

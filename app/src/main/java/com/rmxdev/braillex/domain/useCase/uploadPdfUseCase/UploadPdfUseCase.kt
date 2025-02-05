@@ -11,7 +11,7 @@ class UploadPdfUseCase @Inject constructor(
     private val repository: FileRepository
 ) {
     // Gestion completea del pdf, extraccion de texto, conversion en audio y guardado en firestore
-    suspend operator fun invoke(fileUri: Uri, title: String, context: Context): Result<PdfFile> {
-        return repository.uploadPdfAndGeneratedAudio(fileUri, title, context)
+    suspend operator fun invoke(fileUri: Uri, title: String): Result<PdfFile> {
+        return repository.uploadPdfAndGenerateAudio(fileUri, title)
     }
 }
