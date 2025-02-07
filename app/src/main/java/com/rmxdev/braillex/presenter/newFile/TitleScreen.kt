@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.rmxdev.braillex.R
 import com.rmxdev.braillex.ui.theme.Blue
 import com.rmxdev.braillex.ui.theme.DarkBlack
+import com.rmxdev.braillex.ui.theme.LightGray
 import com.rmxdev.braillex.ui.theme.TextFieldColor
 import com.rmxdev.braillex.ui.theme.White
 
@@ -101,9 +103,11 @@ fun TitleScreen(
             label = { Text("Título") },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-                .clip(CircleShape),
+                .clip(CircleShape)
+                .onFocusChanged {
+                    Log.d("TitleScreen", "TextField focus: ${it.isFocused}")
+                },
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = TextFieldColor,
                 focusedContainerColor = TextFieldColor,
@@ -112,16 +116,18 @@ fun TitleScreen(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
-            maxLines = 1
+            maxLines = 1,
+            enabled = true
         )
         Spacer(modifier = Modifier.weight(0.25f))
         Button(
             onClick = { navigateToUpload(fileUri, title) },
-            colors = buttonColors(containerColor = Blue),
+            colors = buttonColors(containerColor = Blue, disabledContainerColor = LightGray),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
-                .height(50.dp)
+                .height(50.dp),
+            enabled = title.isNotBlank()
         ) {
             Text(text = "Siguiente", fontSize = 25.sp, color = White, fontWeight = FontWeight.Bold)
         }

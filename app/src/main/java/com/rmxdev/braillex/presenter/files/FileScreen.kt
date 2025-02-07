@@ -19,8 +19,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,12 +48,24 @@ fun FileScreen(
     onFileSelected: (Uri) -> Unit
 ) {
     val selectedFile by viewModel.selectedFile.collectAsState()
+    var isFileSelected by remember { mutableStateOf(false) }
 
     // Definir el lanzador fuera del botón
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) { uri ->
-            uri?.let { viewModel.selectFile(it) }
+            uri?.let {
+                viewModel.selectFile(it)
+                isFileSelected = true // Marcar como seleccionado
+            }
         }
+
+    LaunchedEffect(isFileSelected) {
+        if (isFileSelected) {
+            selectedFile?.let {
+                onFileSelected(it)
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -108,11 +124,6 @@ fun FileScreen(
                     .padding(8.dp)
                     .size(30.dp)
             )
-            selectedFile?.let {
-                Text(text = "Archivo seleccionado: ${it.lastPathSegment}")
-                // Navegar a la TitleScreen pasando la URI (por ejemplo, como String)
-                onFileSelected(it)
-            }
         }
 
         Spacer(modifier = Modifier.weight(1f))

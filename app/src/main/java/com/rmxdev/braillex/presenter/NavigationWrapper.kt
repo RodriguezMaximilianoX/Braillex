@@ -27,7 +27,11 @@ fun NavigationWrapper(
     gson: Gson,
     startDestination: String
 ) {
-    NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        modifier = modifier
+    ) {
         composable("initial") {
             InitialScreen(
                 modifier = Modifier,
@@ -81,31 +85,28 @@ fun NavigationWrapper(
                 navigateToHelp = { navController.navigate("help") },
                 onFileSelected = { pdfUri ->
                     val encodedUri = Uri.encode(pdfUri.toString())
-                    navController.navigate("titleScreen/$encodedUri")
+                    navController.navigate("title/$encodedUri")
                 }
             )
         }
-        composable("titleScreen/{pdfUri}") { backStackEntry ->
-            val fileUriStr = backStackEntry.arguments?.getString("pdfUri")
-            val fileUri = fileUriStr?.let { Uri.parse(Uri.decode(it)) }
-
-            fileUri?.let {
-                TitleScreen(
-                    modifier = Modifier,
-                    navigateToInitial = { navController.navigate("initial") },
-                    navigateToHelp = { navController.navigate("help") },
-                    navigateToUpload = { pdfUri, pdfTitle ->
-                        val encodedUri = Uri.encode(pdfUri.toString())
-                        navController.navigate("newFile/$pdfTitle/$encodedUri")
-                    },
-                    fileUri = it
-                )
-            }
+        composable("title/{encodedUri}") { backStackEntry ->
+            val fileUriStr = backStackEntry.arguments?.getString("encodedUri")
+            val fileUri = fileUriStr?.let { Uri.parse(it) }
+            TitleScreen(
+                modifier = Modifier,
+                navigateToInitial = { navController.navigate("initial") },
+                navigateToHelp = { navController.navigate("help") },
+                navigateToUpload = { pdfUri, pdfTitle ->
+                    val encodedUri = Uri.encode(pdfUri.toString())
+                    navController.navigate("newFile/$pdfTitle/$encodedUri")
+                },
+                fileUri = fileUri.takeIf { it != Uri.EMPTY } ?: Uri.EMPTY
+            )
         }
 
-        composable("newFile/{pdfTitle}/{pdfUri}") { backStackEntry ->
+        composable("newFile/{pdfTitle}/{encodedUri}") { backStackEntry ->
             val pdfTitle = backStackEntry.arguments?.getString("pdfTitle")
-            val pdfUri = backStackEntry.arguments?.getString("pdfUri")
+            val pdfUri = backStackEntry.arguments?.getString("encodedUri")
             val fileUri = Uri.parse(pdfUri)
             NewFileScreen(
                 modifier = Modifier,
