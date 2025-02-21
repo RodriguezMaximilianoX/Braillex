@@ -2,9 +2,6 @@ package com.rmxdev.braillex.data.di
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.media.MediaRecorder
-import android.provider.MediaStore.Audio.Media
-import android.util.Log
 import coil.ImageLoader
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -13,10 +10,11 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.rmxdev.braillex.data.network.AndroidTextToSpeechGenerator
-import com.rmxdev.braillex.data.network.QrCodeGenerator
 import com.rmxdev.braillex.data.repository.FileRepositoryImpl
+import com.rmxdev.braillex.data.repository.ReproductorRepositoryImpl
 import com.rmxdev.braillex.data.repository.UserRepositoryImpl
 import com.rmxdev.braillex.domain.repository.FileRepository
+import com.rmxdev.braillex.domain.repository.ReproductorRepository
 import com.rmxdev.braillex.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -31,14 +29,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
-        Log.d("FirebaseModule", "FirebaseAuth instance provided")
         return Firebase.auth
     }
 
     @Provides
     @Singleton
     fun provideFirestore(): FirebaseFirestore {
-        Log.d("FirestoreModule", "Firestore instance provided")
         return FirebaseFirestore.getInstance()
     }
 
@@ -54,7 +50,6 @@ object AppModule {
         auth: FirebaseAuth,
         firestore: FirebaseFirestore
     ): UserRepository {
-        Log.d("AppModule", "UserRepositoryImpl instance provided")
         return UserRepositoryImpl(auth, firestore)
     }
 
@@ -64,20 +59,21 @@ object AppModule {
         @ApplicationContext context: Context,
         firestore: FirebaseFirestore,
         storage: FirebaseStorage,
-        textToSpeech: AndroidTextToSpeechGenerator
+        textToSpeech: AndroidTextToSpeechGenerator,
+        auth: FirebaseAuth
     ): FileRepository {
-        return FileRepositoryImpl(context, storage, firestore, textToSpeech)
+        return FileRepositoryImpl(context, storage, firestore, textToSpeech, auth)
     }
 
     @Provides
     @Singleton
-    fun provideMedia(): MediaPlayer{
+    fun provideMedia(): MediaPlayer {
         return MediaPlayer()
     }
 
     @Provides
     @Singleton
-    fun provideGson(): Gson{
+    fun provideGson(): Gson {
         return Gson()
     }
 
@@ -85,5 +81,13 @@ object AppModule {
     @Singleton
     fun provideCoil(@ApplicationContext context: Context): ImageLoader {
         return ImageLoader.Builder(context).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideReproductorRepository(
+        firestore: FirebaseFirestore
+    ): ReproductorRepository {
+        return ReproductorRepositoryImpl(firestore)
     }
 }

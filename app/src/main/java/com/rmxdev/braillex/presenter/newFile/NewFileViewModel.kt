@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rmxdev.braillex.domain.entities.PdfFile
-import com.rmxdev.braillex.domain.useCase.uploadPdfUseCase.UploadPdfUseCase
+import com.rmxdev.braillex.domain.useCase.repositoryUseCase.uploadPdfUseCase.UploadPdfUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,5 +22,8 @@ class NewFileViewModel @Inject constructor(
         viewModelScope.launch {
             _pdfFile.value = uploadPdfUseCase(uri, title)
         }
+    }
+    fun resetUploadResult() {
+        _pdfFile.value = null // Reiniciar el estado después de la navegación
     }
 }

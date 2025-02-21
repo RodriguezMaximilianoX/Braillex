@@ -5,5 +5,6 @@ import com.google.gson.annotations.SerializedName
 data class PdfFile(
     val id: String,
     val title: String,
-    @SerializedName("audioUrl") val audioUrl: String
+    @SerializedName("audioUrl") val audioUrl: String,
+    val userId: String
 )

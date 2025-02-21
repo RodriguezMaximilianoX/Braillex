@@ -1,12 +1,12 @@
-package com.rmxdev.braillex.domain.useCase.loginUseCase
+package com.rmxdev.braillex.domain.useCase.userUseCase.registerUseCase
 
 import com.rmxdev.braillex.domain.repository.UserRepository
 import javax.inject.Inject
 
-class LoginUseCase @Inject constructor(
+class RegisterUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
     suspend operator fun invoke(email: String, password: String): Result<Unit>{
-        return repository.loginUser(email, password)
+        return repository.registerUser(email, password)
     }
 }

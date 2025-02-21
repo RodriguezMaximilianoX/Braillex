@@ -1,20 +1,27 @@
 package com.rmxdev.braillex.presenter.files
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -35,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rmxdev.braillex.R
+import com.rmxdev.braillex.domain.entities.PdfFile
 import com.rmxdev.braillex.ui.theme.Blue
 import com.rmxdev.braillex.ui.theme.DarkBlack
+import com.rmxdev.braillex.ui.theme.OffWhite
 import com.rmxdev.braillex.ui.theme.White
 
 @Composable
@@ -45,10 +54,12 @@ fun FileScreen(
     viewModel: FileViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit,
     navigateToHelp: () -> Unit,
-    onFileSelected: (Uri) -> Unit
+    onFileSelected: (Uri) -> Unit,
+    navigateToReproductor: (String) -> Unit
 ) {
     val selectedFile by viewModel.selectedFile.collectAsState()
     var isFileSelected by remember { mutableStateOf(false) }
+    val files by viewModel.files.collectAsState()
 
     // Definir el lanzador fuera del botón
     val launcher =
@@ -70,8 +81,7 @@ fun FileScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(White)
-            .verticalScroll(rememberScrollState()),
+            .background(White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -98,6 +108,17 @@ fun FileScreen(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().height(200.dp),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(files) { file ->
+                FileItemRow(file = file, onClick = { navigateToReproductor(file.id)
+                    Log.d("FileScreen", "File ID: $it")})
+            }
+        }
 
         Text(
             text = "Para convertir un archivo a audio presiona el botón azul",
@@ -128,5 +149,20 @@ fun FileScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
+    }
+}
+
+@Composable
+fun FileItemRow(file: PdfFile, onClick: (String) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onClick(file.id) },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = OffWhite)
+    ) {
+        Text(file.title, modifier = Modifier.padding(16.dp), color = DarkBlack)
     }
 }

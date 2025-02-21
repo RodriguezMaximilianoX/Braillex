@@ -1,4 +1,4 @@
-package com.rmxdev.braillex.domain.useCase.uploadPdfUseCase
+package com.rmxdev.braillex.domain.useCase.repositoryUseCase.uploadPdfUseCase
 
 import android.content.Context
 import android.net.Uri

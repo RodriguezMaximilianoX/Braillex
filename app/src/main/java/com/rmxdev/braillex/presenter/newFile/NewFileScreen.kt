@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.rmxdev.braillex.R
-import com.rmxdev.braillex.domain.entities.PdfFile
 import com.rmxdev.braillex.ui.theme.Blue
 import com.rmxdev.braillex.ui.theme.DarkBlack
 import com.rmxdev.braillex.ui.theme.TextFieldColor
@@ -51,7 +50,7 @@ fun NewFileScreen(
     viewModel: NewFileViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit,
     navigateToHelp: () -> Unit,
-    navigateToReproductor: (file: PdfFile) -> Unit,
+    navigateToReproductor: (String) -> Unit,
     pdfTitle: String,
     pdfUri: Uri,
 
@@ -153,9 +152,8 @@ fun NewFileScreen(
         Spacer(modifier = Modifier.weight(4f))
 
         uploadResult?.onSuccess { pdfFile ->
-            LaunchedEffect(pdfFile) {
-                navigateToReproductor(pdfFile)
-            }
+            navigateToReproductor(pdfFile.id)
+            viewModel.resetUploadResult()
         }
         uploadResult?.onFailure {
             LaunchedEffect(context) {

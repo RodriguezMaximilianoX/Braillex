@@ -1,4 +1,4 @@
-package com.rmxdev.braillex.presenter.email
+package com.rmxdev.braillex.presenter.signup
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "17596573151",
-    "project_id": "braillex-467cf",
-    "storage_bucket": "braillex-467cf.firebasestorage.app"
+    "project_number": "50300735936",
+    "project_id": "braillex-85092",
+    "storage_bucket": "braillex-85092.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:17596573151:android:c1bbdd157632884258906a",
+        "mobilesdk_app_id": "1:50300735936:android:1e5df6bf5a0f5ce9383825",
         "android_client_info": {
           "package_name": "com.rmxdev.braillex"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBEGRIi5WB_BOgsYxpE2lcx9bfOq6KEH_w"
+          "current_key": "AIzaSyCkC1TDEshE7rZ7eS8kMGQPlnyhMd7-juk"
         }
       ],
       "services": {

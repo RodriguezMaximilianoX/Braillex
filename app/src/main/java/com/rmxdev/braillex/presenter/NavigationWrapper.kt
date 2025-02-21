@@ -1,6 +1,7 @@
 package com.rmxdev.braillex.presenter
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -8,10 +9,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
-import com.rmxdev.braillex.domain.entities.PdfFile
 import com.rmxdev.braillex.presenter.account.AccountScreen
-import com.rmxdev.braillex.presenter.email.EmailScreen
+import com.rmxdev.braillex.presenter.signup.EmailScreen
 import com.rmxdev.braillex.presenter.files.FileScreen
+import com.rmxdev.braillex.presenter.help.HelpScreen
 import com.rmxdev.braillex.presenter.initial.InitialScreen
 import com.rmxdev.braillex.presenter.login.LoginScreen
 import com.rmxdev.braillex.presenter.media.MediaScreen
@@ -19,6 +20,7 @@ import com.rmxdev.braillex.presenter.newFile.NewFileScreen
 import com.rmxdev.braillex.presenter.newFile.TitleScreen
 import com.rmxdev.braillex.presenter.reproductor.ReproductorScreen
 import com.rmxdev.braillex.presenter.signup.SignupScreen
+import com.rmxdev.braillex.presenter.support.SupportScreen
 
 @Composable
 fun NavigationWrapper(
@@ -28,80 +30,73 @@ fun NavigationWrapper(
     startDestination: String
 ) {
     NavHost(
-        navController = navController,
-        startDestination = startDestination,
-        modifier = modifier
+        navController = navController, startDestination = startDestination, modifier = modifier
     ) {
         composable("initial") {
             InitialScreen(
                 modifier = Modifier,
                 navigateToAccount = { navController.navigate("account") },
-                navigateToFiles = { navController.navigate("files") }
+                navigateToMedia = { audioUrl ->
+                    val encodedUrl = Uri.encode(audioUrl)
+                    navController.navigate("media/$encodedUrl")
+                }
             )
         }
         composable("account") {
-            AccountScreen(
-                modifier = Modifier,
+            AccountScreen(modifier = Modifier,
                 navigateToLogin = { navController.navigate("login") },
                 navigateToEmail = { navController.navigate("userEmail") },
                 navigateToHelp = { navController.navigate("help") },
-                backButton = { navController.popBackStack() }
-            )
+                backButton = { navController.popBackStack() })
         }
         composable("login") {
-            LoginScreen(
-                modifier = Modifier,
+            LoginScreen(modifier = Modifier,
                 backButton = { navController.popBackStack() },
                 navigateToEmail = { navController.navigate("userEmail") },
                 navigateToHelp = { navController.navigate("help") },
-                onLoginSuccess = { navController.navigate("files") }
-            )
+                onLoginSuccess = { navController.navigate("files") })
         }
         composable("userEmail") {
-            EmailScreen(
-                modifier = Modifier,
+            EmailScreen(modifier = Modifier,
                 backButton = { navController.popBackStack() },
                 navigateToSignup = {
                     val userEmail = it
                     navController.navigate("signup/$userEmail")
                 },
-                navigateToHelp = { navController.navigate("help") }
-            )
+                navigateToHelp = { navController.navigate("help") })
         }
         composable("signup/{userEmail}") { backStackEntry ->
             val userEmail = backStackEntry.arguments?.getString("userEmail")
-            SignupScreen(
-                modifier = Modifier,
+            SignupScreen(modifier = Modifier,
                 backButton = { navController.popBackStack() },
                 userEmail = userEmail ?: "",
                 navigateToHelp = { navController.navigate("help") },
-                onLoginSuccess = { navController.navigate("initial") }
-            )
+                onLoginSuccess = { navController.navigate("files") })
         }
         composable("files") {
-            FileScreen(
-                modifier = Modifier,
+            FileScreen(modifier = Modifier,
                 navigateToInitial = { navController.navigate("initial") },
                 navigateToHelp = { navController.navigate("help") },
                 onFileSelected = { pdfUri ->
                     val encodedUri = Uri.encode(pdfUri.toString())
                     navController.navigate("title/$encodedUri")
+                },
+                navigateToReproductor = { fileId ->
+                    navController.navigate("reproductor/$fileId")
                 }
             )
         }
         composable("title/{encodedUri}") { backStackEntry ->
             val fileUriStr = backStackEntry.arguments?.getString("encodedUri")
             val fileUri = fileUriStr?.let { Uri.parse(it) }
-            TitleScreen(
-                modifier = Modifier,
+            TitleScreen(modifier = Modifier,
                 navigateToInitial = { navController.navigate("initial") },
                 navigateToHelp = { navController.navigate("help") },
                 navigateToUpload = { pdfUri, pdfTitle ->
                     val encodedUri = Uri.encode(pdfUri.toString())
                     navController.navigate("newFile/$pdfTitle/$encodedUri")
                 },
-                fileUri = fileUri.takeIf { it != Uri.EMPTY } ?: Uri.EMPTY
-            )
+                fileUri = fileUri.takeIf { it != Uri.EMPTY } ?: Uri.EMPTY)
         }
 
         composable("newFile/{pdfTitle}/{encodedUri}") { backStackEntry ->
@@ -112,32 +107,45 @@ fun NavigationWrapper(
                 modifier = Modifier,
                 navigateToInitial = { navController.navigate("initial") },
                 navigateToHelp = { navController.navigate("help") },
-                navigateToReproductor = {
-                    val pdfFileJson = Uri.encode(gson.toJson(it))
-                    navController.navigate("reproductor/$pdfFileJson")
+                navigateToReproductor = { fileId ->
+                    navController.navigate("reproductor/$fileId")
                 },
                 pdfTitle = pdfTitle ?: "",
                 pdfUri = fileUri
             )
         }
-        composable("reproductor/{pdfFile}") { backStackEntry ->
-            val pdfFileJson = backStackEntry.arguments?.getString("pdfFile")
-            val pdfFile = gson.fromJson(Uri.decode(pdfFileJson), PdfFile::class.java)
+        composable("reproductor/{fileId}") {
+            val fileId = it.arguments?.getString("fileId")
             ReproductorScreen(
                 modifier = Modifier,
+                fileId = fileId ?: "",
                 navigateToInitial = { navController.navigate("initial") },
-                pdfFile = pdfFile,
                 navigateToMedia = { audioUrl ->
-                    navController.navigate("media/$audioUrl")
-                }
-            )
+                    val encodeUri = Uri.encode(audioUrl)
+                    navController.navigate("media/$encodeUri")
+                })
         }
         composable("media/{audioUrl}") { backStackEntry ->
-            val audioUrl = backStackEntry.arguments?.getString("audioUrl")
+            val encodedUrl = backStackEntry.arguments?.getString("audioUrl") ?: ""
+            Log.d("MediaScreen", "Encode URL: $encodedUrl")
             MediaScreen(
                 modifier = Modifier,
                 backButton = { navController.popBackStack() },
-                audioUrl = audioUrl ?: ""
+                audioUrl = encodedUrl ?: ""
+            )
+        }
+        composable("help"){
+            HelpScreen(
+                modifier = Modifier,
+                backButton = { navController.popBackStack() },
+                navigateToSupport = { navController.navigate("support") },
+                navigateToInitial = { navController.navigate("initial") }
+            )
+        }
+        composable("support"){
+            SupportScreen(
+                modifier = Modifier,
+                backButton = { navController.popBackStack() }
             )
         }
     }

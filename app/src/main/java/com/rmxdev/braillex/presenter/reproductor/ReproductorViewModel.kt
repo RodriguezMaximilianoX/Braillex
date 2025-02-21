@@ -1,79 +1,87 @@
 package com.rmxdev.braillex.presenter.reproductor
 
-import android.media.MediaPlayer
-import android.util.Log
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.rmxdev.braillex.data.network.QrCodeGenerator
-import com.rmxdev.braillex.domain.entities.PdfFile
+import com.rmxdev.braillex.domain.useCase.reproductorUseCase.deleteAudioUseCase.DeleteAudioUseCase
+import com.rmxdev.braillex.domain.useCase.reproductorUseCase.getAudioUrlUseCase.GetAudioUrlUseCase
+import com.rmxdev.braillex.domain.useCase.reproductorUseCase.getTitleUseCase.GetTitleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-// ReproductorViewModel.kt
 @HiltViewModel
 class ReproductorViewModel @Inject constructor(
-    private val mediaPlayer: MediaPlayer,
-    private val qrGenerator: QrCodeGenerator
+    private val qrGenerator: QrCodeGenerator,
+    private val getTitleUseCase: GetTitleUseCase,
+    private val getAudioUrlUseCase: GetAudioUrlUseCase,
+    private val deleteAudioUseCase: DeleteAudioUseCase
 ) : ViewModel() {
 
-    private val _reproductorState = MutableStateFlow<ReproductorState>(ReproductorState.Loading)
+    private val _audioTitle = MutableStateFlow("")
+    val audioTitle: StateFlow<String> = _audioTitle
+
+    private val _qrCodeBitmap = MutableStateFlow<Bitmap?>(null)
+    val qrCodeBitmap: StateFlow<Bitmap?> = _qrCodeBitmap
+
+    private val _audioUrl = MutableStateFlow("")
+    val audioUrl: StateFlow<String> = _audioUrl
+
+    private val _reproductorState = MutableStateFlow<ReproductorState>(ReproductorState.Initial)
     val reproductorState: StateFlow<ReproductorState> = _reproductorState
 
-    private lateinit var pdfFile: PdfFile
 
-    fun setPdfFile(file: PdfFile) {
-        pdfFile = file
-        _reproductorState.value = ReproductorState.Success(pdfFile)
-    }
-
-    fun getQrCodeUrl(): String {
-        return qrGenerator.generateQrCode("generated_files/${pdfFile.id}")
-    }
-
-    fun getFileTitle(): String {
-        return pdfFile.title
-    }
-
-    fun playAudio() {
-        mediaPlayer.reset()
-        mediaPlayer.setDataSource(pdfFile.audioUrl)
-        mediaPlayer.prepare()
-        mediaPlayer.start()
-    }
-
-    fun deleteAudioFile(onComplete: (Boolean) -> Unit) {
+    fun loadedData(fieldId: String) {
         viewModelScope.launch {
+            if (_reproductorState.value is ReproductorState.Loading) return@launch
+            _reproductorState.value = ReproductorState.Loading
             try {
-                // Eliminar el archivo PDF de Firebase Storage
-                val pdfStorageRef =
-                    FirebaseStorage.getInstance().reference.child("pdfs/${pdfFile.id}.pdf")
-                pdfStorageRef.delete().await()
+                val titleResult = getTitleUseCase(fieldId)
+                _audioTitle.value = titleResult.getOrNull() ?: "Error al obtener el título"
 
-                // Eliminar el archivo de audio de Firebase Storage
-                val audioStorageRef =
-                    FirebaseStorage.getInstance().reference.child("pdfsAudio/${pdfFile.id}.mp3")
-                audioStorageRef.delete().await()
+                val audioUrlResult = getAudioUrlUseCase(fieldId)
+                _audioUrl.value = audioUrlResult.getOrNull() ?: ""
 
-                // Eliminar el documento en Firestore
-                FirebaseFirestore.getInstance().collection("generated_files").document(pdfFile.id)
-                    .delete().await()
+                if (audioUrlResult.isSuccess) {
+                    _qrCodeBitmap.value = qrGenerator.generateQrCode(_audioUrl.value)
+                }
 
-                onComplete(true)
+                _reproductorState.value = ReproductorState.Success
             } catch (e: Exception) {
-                Log.e("ReproductorViewModel", "Error deleting file: ${e.localizedMessage}")
-                onComplete(false)
+                _reproductorState.value = ReproductorState.Error(e.message ?: "Error al cargar los datos")
             }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        mediaPlayer.release()
+    fun deleteAudio(fieldId: String) {
+        viewModelScope.launch {
+            deleteAudioUseCase(fieldId).onSuccess {
+                _reproductorState.value = ReproductorState.Deleted
+            }.onFailure {
+                _reproductorState.value =
+                    ReproductorState.Error(it.message ?: "Error al eliminar el audio")
+            }
+        }
+    }
+
+    fun shareQrCode(context: Context) {
+        viewModelScope.launch {
+            _qrCodeBitmap.value?.let { bitmap ->
+                qrGenerator.saveQrToCache(bitmap)?.let { uri ->
+                    val shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        type = "image/png"
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Compartir código QR"))
+                }
+            }
+        }
     }
 }

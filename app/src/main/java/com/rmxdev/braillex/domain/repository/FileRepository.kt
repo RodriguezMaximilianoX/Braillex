@@ -5,4 +5,5 @@ import com.rmxdev.braillex.domain.entities.PdfFile
 
 interface FileRepository {
     suspend fun uploadPdfAndGenerateAudio(fileUri: Uri, title: String): Result<PdfFile>
+    suspend fun getFilesByUser(userId: String): Result<List<PdfFile>>
 }

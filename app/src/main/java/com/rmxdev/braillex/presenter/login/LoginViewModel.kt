@@ -2,7 +2,7 @@ package com.rmxdev.braillex.presenter.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rmxdev.braillex.domain.useCase.loginUseCase.LoginUseCase
+import com.rmxdev.braillex.domain.useCase.userUseCase.loginUseCase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
