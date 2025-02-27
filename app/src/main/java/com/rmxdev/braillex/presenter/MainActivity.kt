@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.google.firebase.auth.FirebaseAuth
-import com.google.gson.Gson
 import com.rmxdev.braillex.ui.theme.BraillexTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -30,7 +29,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavigationWrapper(
                         modifier = Modifier.padding(innerPadding),
-                        gson = Gson(),
                         startDestination = startDestination
                     )
                 }

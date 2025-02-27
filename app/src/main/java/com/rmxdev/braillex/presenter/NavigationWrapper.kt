@@ -8,9 +8,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.gson.Gson
+import com.google.firebase.auth.FirebaseAuth
 import com.rmxdev.braillex.presenter.account.AccountScreen
-import com.rmxdev.braillex.presenter.signup.EmailScreen
 import com.rmxdev.braillex.presenter.files.FileScreen
 import com.rmxdev.braillex.presenter.help.HelpScreen
 import com.rmxdev.braillex.presenter.initial.InitialScreen
@@ -19,6 +18,7 @@ import com.rmxdev.braillex.presenter.media.MediaScreen
 import com.rmxdev.braillex.presenter.newFile.NewFileScreen
 import com.rmxdev.braillex.presenter.newFile.TitleScreen
 import com.rmxdev.braillex.presenter.reproductor.ReproductorScreen
+import com.rmxdev.braillex.presenter.signup.EmailScreen
 import com.rmxdev.braillex.presenter.signup.SignupScreen
 import com.rmxdev.braillex.presenter.support.SupportScreen
 
@@ -26,16 +26,17 @@ import com.rmxdev.braillex.presenter.support.SupportScreen
 fun NavigationWrapper(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    gson: Gson,
     startDestination: String
 ) {
     NavHost(
         navController = navController, startDestination = startDestination, modifier = modifier
     ) {
         composable("initial") {
+            val user = FirebaseAuth.getInstance().currentUser
+            val route = if (user != null) "files" else "login"
             InitialScreen(
                 modifier = Modifier,
-                navigateToAccount = { navController.navigate("account") },
+                navigateToAccount = { navController.navigate(route) },
                 navigateToMedia = { audioUrl ->
                     val encodedUrl = Uri.encode(audioUrl)
                     navController.navigate("media/$encodedUrl")
@@ -131,10 +132,10 @@ fun NavigationWrapper(
             MediaScreen(
                 modifier = Modifier,
                 backButton = { navController.popBackStack() },
-                audioUrl = encodedUrl ?: ""
+                audioUrl = encodedUrl
             )
         }
-        composable("help"){
+        composable("help") {
             HelpScreen(
                 modifier = Modifier,
                 backButton = { navController.popBackStack() },
@@ -142,7 +143,7 @@ fun NavigationWrapper(
                 navigateToInitial = { navController.navigate("initial") }
             )
         }
-        composable("support"){
+        composable("support") {
             SupportScreen(
                 modifier = Modifier,
                 backButton = { navController.popBackStack() }

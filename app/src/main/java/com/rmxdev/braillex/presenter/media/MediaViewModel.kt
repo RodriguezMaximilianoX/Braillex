@@ -1,7 +1,6 @@
 package com.rmxdev.braillex.presenter.media
 
 import android.media.MediaPlayer
-import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -15,12 +14,6 @@ class MediaViewModel @Inject constructor() : ViewModel() {
     var isPrepared = mutableStateOf(false) // Ahora es MutableState
 
     fun initializePlayer(audioUrl: String) {
-
-        Log.d("MediaPlayer", "Intentando inicializar MediaPlayer con URL: $audioUrl")
-
-       // val validUrl = Uri.decode(audioUrl) // Decodifica por seguridad
-
-      // Log.d("MediaPlayer", "Usando URL: $validUrl") // Verifica la URL en logs
 
         mediaPlayer?.release() // Libera cualquier instancia previa
         mediaPlayer = MediaPlayer().apply {

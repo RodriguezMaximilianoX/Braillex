@@ -91,7 +91,6 @@ dependencies {
 
     //Media
     implementation(libs.media)
-    implementation(libs.media3)
 
     //Gson
     implementation(libs.gson)

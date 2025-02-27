@@ -103,6 +103,7 @@ fun InitialScreen(
                     modifier = Modifier
                         .background(White)
                         .size(40.dp),
+                    tint = Color.Unspecified
                 )
             }
         }

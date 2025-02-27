@@ -146,6 +146,7 @@ fun FileScreen(
                     .size(30.dp)
             )
         }
+        Text("Subir Archivo", fontSize = 15.sp, color = DarkBlack)
 
         Spacer(modifier = Modifier.weight(1f))
 

@@ -44,19 +44,6 @@ fun AccountScreen(
     navigateToHelp: () -> Unit,
     backButton: () -> Unit
 ) {
-
-    val systemUiController = rememberSystemUiController()
-    val statusBarColor = White
-
-    SideEffect {
-        systemUiController.setStatusBarColor(
-            color = statusBarColor
-        )
-        systemUiController.setNavigationBarColor(
-            color = statusBarColor
-        )
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
