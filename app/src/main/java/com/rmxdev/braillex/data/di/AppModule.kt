@@ -2,6 +2,7 @@ package com.rmxdev.braillex.data.di
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.media3.exoplayer.ExoPlayer
 import coil.ImageLoader
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -89,5 +90,11 @@ object AppModule {
         firestore: FirebaseFirestore
     ): ReproductorRepository {
         return ReproductorRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
+        return ExoPlayer.Builder(context).build()
     }
 }
