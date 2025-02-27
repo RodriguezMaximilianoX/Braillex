@@ -2,7 +2,6 @@ package com.rmxdev.braillex.presenter.initial
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -60,9 +59,7 @@ fun InitialScreen(
     }
 
     LaunchedEffect(scannedQr) {
-        Log.d("InitialScreen", "LaunchedEffect triggered with scannedQr: $scannedQr")
         scannedQr?.let { audioUrl ->
-            Log.d("InitialScreen", "scannedQr updated: $scannedQr")
             navigateToMedia(audioUrl)
         }
     }

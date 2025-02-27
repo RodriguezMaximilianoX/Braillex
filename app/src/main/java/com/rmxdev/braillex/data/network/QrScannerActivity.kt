@@ -29,7 +29,7 @@ class QrScannerActivity : AppCompatActivity() {
             setDesiredBarcodeFormats(ScanOptions.QR_CODE)
             setPrompt("Escanea el código QR")
             setCameraId(0)
-            setBeepEnabled(true)
+            setBeepEnabled(false)
             setBarcodeImageEnabled(true)
         }
         barcodeLauncher.launch(options)

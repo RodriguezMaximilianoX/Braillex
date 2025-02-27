@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -57,6 +58,7 @@ fun NewFileScreen(
     ) {
     val uploadResult by viewModel.pdfFile.collectAsState()
     val context = LocalContext.current
+    val isUploading by viewModel.isUploading.collectAsState()
 
     Column(
         modifier = modifier
@@ -145,9 +147,15 @@ fun NewFileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
-                .height(50.dp)
+                .height(50.dp),
+            enabled = !isUploading
         ) {
-            Text(text = "Guardar", fontSize = 25.sp, color = White, fontWeight = FontWeight.Bold)
+            if (isUploading){
+                CircularProgressIndicator()
+            }
+            else{
+                Text(text = "Guardar", fontSize = 25.sp, color = White, fontWeight = FontWeight.Bold)
+            }
         }
         Spacer(modifier = Modifier.weight(4f))
 

@@ -1,7 +1,9 @@
 package com.rmxdev.braillex.presenter.media
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +23,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +38,7 @@ import com.rmxdev.braillex.R
 import com.rmxdev.braillex.ui.theme.DarkBlack
 import com.rmxdev.braillex.ui.theme.White
 
+@SuppressLint("ClickableViewAccessibility")
 @Composable
 fun MediaScreen(
     modifier: Modifier = Modifier,
@@ -47,8 +50,9 @@ fun MediaScreen(
     val systemUiController = rememberSystemUiController()
     val statusBarColor = DarkBlack
     val isPrepared by remember { viewModel.isPrepared }
-    val isPlaying by rememberSaveable { viewModel.isPlaying }
+    val isPlaying by remember { viewModel.isPlaying }
     val text = if (isPlaying) "Pausar" else "Reproducir"
+
 
     SideEffect {
         systemUiController.setStatusBarColor(
@@ -66,7 +70,34 @@ fun MediaScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkBlack),
+            .background(DarkBlack)
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoom, rotation ->
+                    when {
+                        rotation > 10f -> {
+                            viewModel.increaseVolume()
+                            viewModel.updateButtonState("volumeUp")
+                        } // Giro horario
+                        rotation < -10f -> {
+                            viewModel.decreaseVolume()
+                            viewModel.updateButtonState("volumeDown")
+                        } // Giro antihorario
+                        pan.x > 100 -> {
+                            viewModel.seekForward()
+                            viewModel.updateButtonState("forwardAudio")
+                        } // Deslizar derecha
+                        pan.x < -100 -> {
+                            viewModel.seekBackward()
+                            viewModel.updateButtonState("backwardAudio")
+                        } // Deslizar izquierda
+                        pan.y > 100 -> {
+                            backButton()
+                            viewModel.onCleared()
+                            viewModel.updateButtonState("home")
+                        } // Deslizar hacia abajo
+                    }
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -142,11 +173,9 @@ fun MediaScreen(
                         .size(100.dp)
 
                 ) {
-                    val buttonState =
-                        if (isPlaying) R.drawable.pausebutton else R.drawable.playbutton
                     Icon(
-                        painterResource(id = buttonState),
-                        contentDescription = "Play/Pause",
+                        painterResource(id = viewModel.buttonState.intValue),
+                        contentDescription = viewModel.buttonDescription.value,
                         tint = Color.Unspecified
                     )
                 }

@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
@@ -27,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -38,6 +41,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.rmxdev.braillex.R
 import com.rmxdev.braillex.ui.theme.Blue
 import com.rmxdev.braillex.ui.theme.DarkBlack
+import com.rmxdev.braillex.ui.theme.OffWhite
 import com.rmxdev.braillex.ui.theme.White
 
 @Composable
@@ -46,6 +50,7 @@ fun ReproductorScreen(
     fileId: String,
     viewModel: ReproductorViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit,
+    navigateToFiles: () -> Unit,
     navigateToMedia: (String) -> Unit,
 ) {
 
@@ -83,7 +88,7 @@ fun ReproductorScreen(
                 modifier = Modifier.size(70.dp)
             ) {
                 Icon(
-                    painterResource(id = R.drawable.settingbutton),
+                    painterResource(id = R.drawable.deletebutton),
                     contentDescription = "Ir a configuraciones",
                     tint = Color.Unspecified,
                     modifier = Modifier.padding(8.dp)
@@ -95,11 +100,13 @@ fun ReproductorScreen(
             Image(
                 painter = painter,
                 contentDescription = "QR Code",
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier.size(250.dp)
             )
         }
         Text(
             text = title,
+            fontSize = 20.sp,
+            color = DarkBlack,
             modifier = Modifier.padding(top = 16.dp)
         )
         Button(
@@ -145,7 +152,7 @@ fun ReproductorScreen(
             Text(
                 text = "Volver al inicio",
                 fontSize = 25.sp,
-                color = DarkBlack,
+                color = Blue,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -157,14 +164,23 @@ fun ReproductorScreen(
         }
 
         is ReproductorState.Loading -> {
-            CircularProgressIndicator()
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(White)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
 
         is ReproductorState.Deleted -> {
             LaunchedEffect(context) {
                 Toast.makeText(context, "Audio eliminado", Toast.LENGTH_LONG).show()
             }
-            navigateToInitial()
+            navigateToFiles()
         }
 
         is ReproductorState.Success -> {

@@ -2,12 +2,14 @@ package com.rmxdev.braillex.presenter.media
 
 import android.media.MediaPlayer
 import android.util.Log
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.rmxdev.braillex.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -18,6 +20,37 @@ class MediaViewModel @Inject constructor(
 
     var isPlaying = mutableStateOf(false)
     var isPrepared = mutableStateOf(false)
+    var buttonState = mutableIntStateOf(R.drawable.playbutton)
+    var buttonDescription = mutableStateOf("Play/Pause")
+
+    fun updateButtonState(action: String) {
+        when (action) {
+            "playPause" -> {
+                buttonState.intValue = if (isPlaying.value) R.drawable.pausebutton else R.drawable.playbutton
+                buttonDescription.value = "Play/Pause"
+            }
+            "volumeUp" -> {
+                buttonState.intValue = R.drawable.volumebutton
+                buttonDescription.value = "Subir Volumen"
+            }
+            "volumeDown" -> {
+                buttonState.intValue = R.drawable.volumebutton
+                buttonDescription.value = "Bajar Volumen"
+            }
+            "home" -> {
+                buttonState.intValue = R.drawable.initialbutton
+                buttonDescription.value = "Ir al Inicio"
+            }
+            "forwardAudio" -> {
+                buttonState.intValue = R.drawable.nextbutton
+                buttonDescription.value = "Adelantar"
+            }
+            "backwardAudio" -> {
+                buttonState.intValue = R.drawable.previousbutton
+                buttonDescription.value = "Retroceder"
+            }
+        }
+    }
 
     fun initializePlayer(audioUrl: String) {
         val mediaItem = MediaItem.fromUri(audioUrl)

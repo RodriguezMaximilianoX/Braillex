@@ -75,7 +75,6 @@ dependencies {
     //Dagger Hilt
     implementation(libs.dagger.hilt)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.media3.exoplayer)
     ksp(libs.dagger.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
@@ -97,6 +96,9 @@ dependencies {
 
     //Coil
     implementation(libs.coil)
+
+    //Google Fonts
+    implementation(libs.google.fonts)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
