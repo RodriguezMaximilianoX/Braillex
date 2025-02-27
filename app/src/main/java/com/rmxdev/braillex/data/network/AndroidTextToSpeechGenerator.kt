@@ -18,6 +18,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
+import java.util.Locale
 import javax.inject.Inject
 
 class AndroidTextToSpeechGenerator @Inject constructor(
@@ -27,7 +28,7 @@ class AndroidTextToSpeechGenerator @Inject constructor(
     private val textToSpeech: TextToSpeech = TextToSpeech(context) { status ->
         isInitialized = (status == TextToSpeech.SUCCESS)
         if (!isInitialized) {
-            Log.e("TTS", "Initialization failed")
+            Log.e("TTS", "Inicialización fallida")
         }
     }
 
@@ -47,6 +48,14 @@ class AndroidTextToSpeechGenerator @Inject constructor(
                 val audioFile = File(context.cacheDir, "$fileId.mp3")
                 Log.d("TTS", "Archivo de audio generado en: ${audioFile.path}")
 
+                // Configurar idioma español latinoamericano
+                val result = textToSpeech.setLanguage(Locale("es", "MX"))
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e("TTS", "Idioma no soportado o faltan datos")
+                    onComplete(null)
+                    return@launch
+                }
+
                 val params = Bundle().apply {
                     putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, fileId)
                 }
@@ -62,10 +71,7 @@ class AndroidTextToSpeechGenerator @Inject constructor(
                         CoroutineScope(Dispatchers.Main).launch {
                             delay(1000) // Espera breve para asegurar que el archivo se escribe
                             if (audioFile.exists() && audioFile.length() > 0) {
-                                Log.d(
-                                    "TTS",
-                                    "Audio generado exitosamente. Tamaño: ${audioFile.length()} bytes"
-                                )
+                                Log.d("TTS", "Audio generado exitosamente. Tamaño: ${audioFile.length()} bytes")
                                 textToSpeech.shutdown()
                                 onComplete(audioFile)
                             } else {
@@ -81,9 +87,9 @@ class AndroidTextToSpeechGenerator @Inject constructor(
                     }
                 })
 
-                val result = textToSpeech.synthesizeToFile(text, params, audioFile, fileId)
+                val synthResult = textToSpeech.synthesizeToFile(text, params, audioFile, fileId)
 
-                if (result != TextToSpeech.SUCCESS) {
+                if (synthResult != TextToSpeech.SUCCESS) {
                     Log.e("TTS", "Error en synthesizeToFile()")
                     onComplete(null)
                 }
