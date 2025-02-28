@@ -167,7 +167,10 @@ fun MediaScreen(
                     )
                 }
                 IconButton(
-                    onClick = { viewModel.playPause() },
+                    onClick = {
+                        viewModel.playPause()
+                        viewModel.updateButtonState("playPause")
+                    },
                     modifier = Modifier
                         .padding(16.dp)
                         .size(100.dp)
