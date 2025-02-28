@@ -206,7 +206,7 @@ fun MediaScreen(
                         viewModel.updateButtonState("playPause")
                     },
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(8.dp)
                         .size(100.dp)
 
                 ) {
