@@ -46,7 +46,6 @@ fun ReproductorScreen(
     fileId: String,
     viewModel: ReproductorViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit,
-    navigateToFiles: () -> Unit,
     navigateToMedia: (String) -> Unit,
 ) {
 
@@ -176,7 +175,7 @@ fun ReproductorScreen(
             LaunchedEffect(context) {
                 Toast.makeText(context, "Audio eliminado", Toast.LENGTH_LONG).show()
             }
-            navigateToFiles()
+            navigateToInitial()
         }
 
         is ReproductorState.Success -> {

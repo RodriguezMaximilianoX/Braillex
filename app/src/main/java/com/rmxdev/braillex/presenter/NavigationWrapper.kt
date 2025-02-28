@@ -121,7 +121,6 @@ fun NavigationWrapper(
                 modifier = Modifier,
                 fileId = fileId ?: "",
                 navigateToInitial = { navController.navigate("initial") },
-                navigateToFiles = { navController.navigate("files") },
                 navigateToMedia = { audioUrl ->
                     val encodeUri = Uri.encode(audioUrl)
                     navController.navigate("media/$encodeUri")

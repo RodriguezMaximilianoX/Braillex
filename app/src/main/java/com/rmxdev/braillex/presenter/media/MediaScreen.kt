@@ -3,7 +3,7 @@ package com.rmxdev.braillex.presenter.media
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +41,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.rmxdev.braillex.R
 import com.rmxdev.braillex.ui.theme.DarkBlack
 import com.rmxdev.braillex.ui.theme.White
+import kotlin.math.atan2
 
 @SuppressLint("ClickableViewAccessibility")
 @Composable
@@ -52,6 +57,8 @@ fun MediaScreen(
     val isPrepared by remember { viewModel.isPrepared }
     val isPlaying by remember { viewModel.isPlaying }
     val text = if (isPlaying) "Pausar" else "Reproducir"
+    var lastAngle by remember { mutableStateOf<Float?>(null) }
+    var totalRotation by remember { mutableFloatStateOf(0f) }
 
 
     SideEffect {
@@ -72,25 +79,52 @@ fun MediaScreen(
             .fillMaxSize()
             .background(DarkBlack)
             .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, rotation ->
-                    when {
-                        rotation > 10f -> {
+                detectDragGestures { change, dragAmount ->
+                    val center = Offset(500f, 1000f) // Punto central de referencia
+                    val currentPos = change.position
+
+                    // Calcular ángulo actual para giros
+                    val angle = atan2(
+                        currentPos.y - center.y,
+                        currentPos.x - center.x
+                    ) * (180 / Math.PI).toFloat()
+
+                    lastAngle?.let { previousAngle ->
+                        var delta = angle - previousAngle
+                        delta = when {
+                            delta > 180 -> delta - 360
+                            delta < -180 -> delta + 360
+                            else -> delta
+                        }
+
+                        totalRotation += delta
+
+                        // Ejecutar acción cada 90° de rotación
+                        while (totalRotation >= 90) {
                             viewModel.increaseVolume()
                             viewModel.updateButtonState("volumeUp")
-                        } // Giro horario
-                        rotation < -10f -> {
+                            totalRotation -= 90
+                        }
+                        while (totalRotation <= -90) {
                             viewModel.decreaseVolume()
                             viewModel.updateButtonState("volumeDown")
-                        } // Giro antihorario
-                        pan.x > 100 -> {
+                            totalRotation += 90
+                        }
+                    }
+
+                    lastAngle = angle
+
+                    // Detectar deslizamientos horizontales y verticales
+                    when {
+                        dragAmount.x > 100 -> {
                             viewModel.seekForward()
                             viewModel.updateButtonState("forwardAudio")
                         } // Deslizar derecha
-                        pan.x < -100 -> {
+                        dragAmount.x < -100 -> {
                             viewModel.seekBackward()
                             viewModel.updateButtonState("backwardAudio")
                         } // Deslizar izquierda
-                        pan.y > 100 -> {
+                        dragAmount.y > 100 -> {
                             backButton()
                             viewModel.onCleared()
                             viewModel.updateButtonState("home")
