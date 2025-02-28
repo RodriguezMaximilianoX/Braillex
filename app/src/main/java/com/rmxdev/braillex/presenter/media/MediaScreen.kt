@@ -1,6 +1,5 @@
 package com.rmxdev.braillex.presenter.media
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -43,7 +42,6 @@ import com.rmxdev.braillex.ui.theme.DarkBlack
 import com.rmxdev.braillex.ui.theme.White
 import kotlin.math.atan2
 
-@SuppressLint("ClickableViewAccessibility")
 @Composable
 fun MediaScreen(
     modifier: Modifier = Modifier,
@@ -79,11 +77,11 @@ fun MediaScreen(
             .fillMaxSize()
             .background(DarkBlack)
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
-                    val center = Offset(500f, 1000f) // Punto central de referencia
+                detectDragGestures(onDragStart = { lastAngle = null }) { change, _ ->
+                    val center = Offset(500f, 1000f)
                     val currentPos = change.position
 
-                    // Calcular ángulo actual para giros
+                    // Calcular ángulo actual
                     val angle = atan2(
                         currentPos.y - center.y,
                         currentPos.x - center.x
@@ -99,36 +97,38 @@ fun MediaScreen(
 
                         totalRotation += delta
 
-                        // Ejecutar acción cada 90° de rotación
-                        while (totalRotation >= 90) {
+                        // Ejecutar acción solo si la rotación completa 360°
+                        if (totalRotation >= 360) {
                             viewModel.increaseVolume()
                             viewModel.updateButtonState("volumeUp")
-                            totalRotation -= 90
-                        }
-                        while (totalRotation <= -90) {
+                            totalRotation -= 360
+                        } else if (totalRotation <= -360) {
                             viewModel.decreaseVolume()
                             viewModel.updateButtonState("volumeDown")
-                            totalRotation += 90
+                            totalRotation += 360
                         }
                     }
-
                     lastAngle = angle
 
-                    // Detectar deslizamientos horizontales y verticales
-                    when {
-                        dragAmount.x > 100 -> {
-                            viewModel.seekForward()
-                            viewModel.updateButtonState("forwardAudio")
-                        } // Deslizar derecha
-                        dragAmount.x < -100 -> {
-                            viewModel.seekBackward()
-                            viewModel.updateButtonState("backwardAudio")
-                        } // Deslizar izquierda
-                        dragAmount.y > 100 -> {
+                    // Determinar ángulos de deslizamiento recto
+                    val direction = angle % 360
+                    // Deslizamiento de arriba a abajo (hacia el centro, en la dirección de 0° a 360°)
+                    when (direction) {
+                        in -10.0..10.0, in 350.0..360.0 -> {
                             backButton()
                             viewModel.onCleared()
                             viewModel.updateButtonState("home")
-                        } // Deslizar hacia abajo
+                        }
+                        // Deslizamiento de izquierda a derecha (de 270° a 360° o de 0° a 90°)
+                        in 270.0..360.0, in 0.0..90.0 -> {
+                            viewModel.seekForward()
+                            viewModel.updateButtonState("forwardAudio")
+                        }
+                        // Deslizamiento de derecha a izquierda (de 90° a 270°)
+                        in 90.0..270.0 -> {
+                            viewModel.seekBackward()
+                            viewModel.updateButtonState("backwardAudio")
+                        }
                     }
                 }
             },
