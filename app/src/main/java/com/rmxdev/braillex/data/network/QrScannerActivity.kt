@@ -3,10 +3,8 @@ package com.rmxdev.braillex.data.network
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanIntentResult
 import com.journeyapps.barcodescanner.ScanOptions
 
 class QrScannerActivity : AppCompatActivity() {
@@ -14,7 +12,6 @@ class QrScannerActivity : AppCompatActivity() {
     private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             val intent = Intent()
-            Log.d("QrScannerActivity", "Scanned content: ${result.contents}")
             intent.putExtra("SCANNED_FILE_ID", result.contents)
             setResult(Activity.RESULT_OK, intent)
         } else {

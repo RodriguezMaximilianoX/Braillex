@@ -1,7 +1,6 @@
 package com.rmxdev.braillex.data.di
 
 import android.content.Context
-import android.media.MediaPlayer
 import androidx.media3.exoplayer.ExoPlayer
 import coil.ImageLoader
 import com.google.firebase.auth.FirebaseAuth
@@ -64,12 +63,6 @@ object AppModule {
         auth: FirebaseAuth
     ): FileRepository {
         return FileRepositoryImpl(context, storage, firestore, textToSpeech, auth)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMedia(): MediaPlayer {
-        return MediaPlayer()
     }
 
     @Provides
