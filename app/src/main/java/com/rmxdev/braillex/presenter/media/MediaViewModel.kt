@@ -29,14 +29,6 @@ class MediaViewModel @Inject constructor(
                 buttonState.intValue = if (isPlaying.value) R.drawable.pausebutton else R.drawable.playbutton
                 buttonDescription.value = "Play/Pause"
             }
-            "volumeUp" -> {
-                buttonState.intValue = R.drawable.volumebutton
-                buttonDescription.value = "Subir Volumen"
-            }
-            "volumeDown" -> {
-                buttonState.intValue = R.drawable.volumebutton
-                buttonDescription.value = "Bajar Volumen"
-            }
             "home" -> {
                 buttonState.intValue = R.drawable.initialbutton
                 buttonDescription.value = "Ir al Inicio"
@@ -53,12 +45,14 @@ class MediaViewModel @Inject constructor(
     }
 
     fun initializePlayer(audioUrl: String) {
+        Log.d("ExoPlayer", "Hilo actual en initializePlayer: ${Thread.currentThread().name}")
         val mediaItem = MediaItem.fromUri(audioUrl)
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
 
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
+                Log.d("ExoPlayer", "Hilo actual en onPlaybackStateChanged: ${Thread.currentThread().name}")
                 isPrepared.value = state == Player.STATE_READY
                 if (state == Player.STATE_ENDED) {
                     isPlaying.value = false
@@ -94,21 +88,7 @@ class MediaViewModel @Inject constructor(
         Log.d("ExoPlayer", "Retrocediendo 5 segundos")
     }
 
-    fun increaseVolume() {
-        val newVolume = minOf(exoPlayer.volume + 0.25f, 1f)
-        exoPlayer.volume = newVolume
-        Log.d("ExoPlayer", "Volumen aumentado a $newVolume")
-    }
-
-    fun decreaseVolume() {
-        val newVolume = maxOf(exoPlayer.volume - 0.25f, 0f)
-        exoPlayer.volume = newVolume
-        Log.d("ExoPlayer", "Volumen reducido a $newVolume")
-    }
-
-    public override fun onCleared() {
-        super.onCleared()
-        exoPlayer.release()
-        Log.d("ExoPlayer", "ExoPlayer liberado")
+    fun stop() {
+        exoPlayer.stop()
     }
 }
