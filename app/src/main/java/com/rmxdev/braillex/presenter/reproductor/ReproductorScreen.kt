@@ -84,7 +84,7 @@ fun ReproductorScreen(
             ) {
                 Icon(
                     painterResource(id = R.drawable.deletebutton),
-                    contentDescription = "Ir a configuraciones",
+                    contentDescription = "Eliminar audio",
                     tint = Color.Unspecified,
                     modifier = Modifier.padding(8.dp)
                 )
@@ -176,6 +176,7 @@ fun ReproductorScreen(
                 Toast.makeText(context, "Audio eliminado", Toast.LENGTH_LONG).show()
             }
             navigateToInitial()
+            viewModel.resetState()
         }
 
         is ReproductorState.Success -> {

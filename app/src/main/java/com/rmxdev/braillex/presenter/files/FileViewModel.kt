@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.rmxdev.braillex.domain.entities.PdfFile
 import com.rmxdev.braillex.domain.useCase.repositoryUseCase.getFilesByUserUseCase.GetFilesByUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ class FileViewModel @Inject constructor(
 
     private fun setFiles() {
         val userId = auth.currentUser?.uid ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             filesUseCase(userId).onSuccess { files ->
                 _files.value = files
             }.onFailure {

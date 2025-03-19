@@ -162,6 +162,7 @@ fun LoginScreen(
             }
             is LoginState.Success -> {
                 onLoginSuccess()
+                viewModel.resetState()
             }
             is LoginState.Error -> {
                 LaunchedEffect(loginState) {

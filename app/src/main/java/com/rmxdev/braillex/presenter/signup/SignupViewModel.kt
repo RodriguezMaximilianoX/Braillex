@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rmxdev.braillex.domain.useCase.userUseCase.registerUseCase.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,7 +20,7 @@ class SignupViewModel @Inject constructor(
 
     fun registerUser(email: String, password: String){
         if(email.isNotBlank() && password.isNotBlank()){
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 _signupState.value = SignUpState.Loading
                 _signupState.value = signupUseCase(email, password)
                     .fold(

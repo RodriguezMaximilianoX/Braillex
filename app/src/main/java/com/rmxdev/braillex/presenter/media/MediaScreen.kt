@@ -49,6 +49,7 @@ fun MediaScreen(
     val isPrepared by remember { viewModel.isPrepared }
     val isPlaying by remember { viewModel.isPlaying }
     val text = if (isPlaying) "Pausar" else "Reproducir"
+    val iconPadding = if (isPlaying) 8.dp else 16.dp
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -68,11 +69,9 @@ fun MediaScreen(
                     when {
                         pan.x > 100 -> {
                             viewModel.seekForward()
-                            viewModel.updateButtonState("forwardAudio")
                         } // Deslizar derecha
                         pan.x < -100 -> {
                             viewModel.seekBackward()
-                            viewModel.updateButtonState("backwardAudio")
                         } // Deslizar izquierda
                         pan.y > 100 -> {
                             backButton()
@@ -156,7 +155,7 @@ fun MediaScreen(
                         viewModel.updateButtonState("playPause")
                     },
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(iconPadding)
                         .size(100.dp)
 
                 ) {

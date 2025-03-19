@@ -10,6 +10,7 @@ import com.rmxdev.braillex.domain.useCase.reproductorUseCase.deleteAudioUseCase.
 import com.rmxdev.braillex.domain.useCase.reproductorUseCase.getAudioUrlUseCase.GetAudioUrlUseCase
 import com.rmxdev.braillex.domain.useCase.reproductorUseCase.getTitleUseCase.GetTitleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -37,7 +38,7 @@ class ReproductorViewModel @Inject constructor(
 
 
     fun loadedData(fieldId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (_reproductorState.value is ReproductorState.Loading) return@launch
             _reproductorState.value = ReproductorState.Loading
             try {
@@ -59,7 +60,7 @@ class ReproductorViewModel @Inject constructor(
     }
 
     fun deleteAudio(fieldId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             deleteAudioUseCase(fieldId).onSuccess {
                 _reproductorState.value = ReproductorState.Deleted
             }.onFailure {
@@ -70,7 +71,7 @@ class ReproductorViewModel @Inject constructor(
     }
 
     fun shareQrCode(context: Context) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _qrCodeBitmap.value?.let { bitmap ->
                 qrGenerator.saveQrToCache(bitmap)?.let { uri ->
                     val shareIntent = Intent().apply {
@@ -83,5 +84,9 @@ class ReproductorViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun resetState() {
+        _reproductorState.value = ReproductorState.Initial
     }
 }

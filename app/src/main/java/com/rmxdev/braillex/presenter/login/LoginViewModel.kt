@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rmxdev.braillex.domain.useCase.userUseCase.loginUseCase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,7 +20,7 @@ class LoginViewModel @Inject constructor(
 
     fun loginUser(email: String, password: String){
         if(email.isNotBlank() && password.isNotBlank()){
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 _loginState.value = LoginState.Loading
                 _loginState.value = loginUseCase(email, password)
                     .fold(
@@ -28,5 +29,9 @@ class LoginViewModel @Inject constructor(
                     )
             }
         }
+    }
+
+    fun resetState(){
+        _loginState.value = LoginState.Idle
     }
 }

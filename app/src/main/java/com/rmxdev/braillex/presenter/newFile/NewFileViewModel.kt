@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.rmxdev.braillex.domain.entities.PdfFile
 import com.rmxdev.braillex.domain.useCase.repositoryUseCase.uploadPdfUseCase.UploadPdfUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ class NewFileViewModel @Inject constructor(
 
     fun uploadFile(uri: Uri, title: String) {
         _isUploading.value = true
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _pdfFile.value = uploadPdfUseCase(uri, title)
             _isUploading.value = false
         }

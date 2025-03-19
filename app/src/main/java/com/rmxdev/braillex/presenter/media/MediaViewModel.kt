@@ -33,14 +33,6 @@ class MediaViewModel @Inject constructor(
                 buttonState.intValue = R.drawable.initialbutton
                 buttonDescription.value = "Ir al Inicio"
             }
-            "forwardAudio" -> {
-                buttonState.intValue = R.drawable.nextbutton
-                buttonDescription.value = "Adelantar"
-            }
-            "backwardAudio" -> {
-                buttonState.intValue = R.drawable.previousbutton
-                buttonDescription.value = "Retroceder"
-            }
         }
     }
 
