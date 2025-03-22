@@ -30,4 +30,8 @@ class SignupViewModel @Inject constructor(
             }
         }
     }
+
+    fun resetState(){
+        _signupState.value = SignUpState.Idle
+    }
 }

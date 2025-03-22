@@ -35,7 +35,6 @@
             android:name=".presenter.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Braillex">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

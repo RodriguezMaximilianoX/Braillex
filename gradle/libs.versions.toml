@@ -23,6 +23,7 @@ gson = "2.10.1"
 coil = "2.2.2"
 appcompat = "1.7.0"
 googleFonts = "1.7.8"
+splashScreen = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -65,7 +66,10 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 
 coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+
+splashScreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -158,6 +158,7 @@ fun SignupScreen(
             }
             is SignUpState.Success -> {
                 onLoginSuccess()
+                viewModel.resetState()
             }
             is SignUpState.Error -> {
                 LaunchedEffect(signupState) {
