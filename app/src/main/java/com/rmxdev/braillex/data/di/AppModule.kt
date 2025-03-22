@@ -11,9 +11,11 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.rmxdev.braillex.data.network.AndroidTextToSpeechGenerator
 import com.rmxdev.braillex.data.repository.FileRepositoryImpl
+import com.rmxdev.braillex.data.repository.MediaRepositoryImpl
 import com.rmxdev.braillex.data.repository.ReproductorRepositoryImpl
 import com.rmxdev.braillex.data.repository.UserRepositoryImpl
 import com.rmxdev.braillex.domain.repository.FileRepository
+import com.rmxdev.braillex.domain.repository.MediaRepository
 import com.rmxdev.braillex.domain.repository.ReproductorRepository
 import com.rmxdev.braillex.domain.repository.UserRepository
 import dagger.Module
@@ -89,5 +91,13 @@ object AppModule {
     @Singleton
     fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
         return ExoPlayer.Builder(context).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMediaRepository(
+        storage: FirebaseStorage
+    ): MediaRepository{
+        return MediaRepositoryImpl(storage)
     }
 }
