@@ -115,7 +115,8 @@ fun NewFileScreen(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledTextColor = DarkBlack,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
+                disabledContainerColor = TextFieldColor
             ),
             maxLines = 1
         )
@@ -135,7 +136,8 @@ fun NewFileScreen(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledTextColor = DarkBlack,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
+                disabledContainerColor = TextFieldColor
             ),
             maxLines = 1
         )

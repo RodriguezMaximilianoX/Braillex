@@ -30,7 +30,7 @@ class FileViewModel @Inject constructor(
 
     private fun setFiles() {
         val userId = auth.currentUser?.uid ?: return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             filesUseCase(userId).onSuccess { files ->
                 _files.value = files
             }.onFailure {
