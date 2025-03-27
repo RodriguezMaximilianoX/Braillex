@@ -40,9 +40,9 @@ import com.rmxdev.braillex.ui.theme.White
 @Composable
 fun MediaScreen(
     modifier: Modifier = Modifier,
-    backButton: () -> Unit,
     audioUrl: String,
-    viewModel: MediaViewModel = hiltViewModel()
+    viewModel: MediaViewModel = hiltViewModel(),
+    navigateToFiles: () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
     val statusBarColor = DarkBlack
@@ -74,7 +74,7 @@ fun MediaScreen(
                             viewModel.seekBackward()
                         } // Deslizar izquierda
                         pan.y > 100 -> {
-                            backButton()
+                            navigateToFiles()
                             viewModel.updateButtonState("home")
                             viewModel.stop()
                         } // Deslizar hacia abajo
@@ -102,7 +102,7 @@ fun MediaScreen(
             ) {
                 IconButton(
                     onClick = {
-                        backButton()
+                        navigateToFiles()
                         viewModel.stop()
                     },
                     modifier = Modifier.size(70.dp)

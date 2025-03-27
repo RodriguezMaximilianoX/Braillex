@@ -127,12 +127,14 @@ fun NavigationWrapper(
                 })
         }
         composable("media/{audioUrl}") { backStackEntry ->
+            val user = FirebaseAuth.getInstance().currentUser
+            val route = if (user != null) "files" else "initial"
             val encodedUrl = backStackEntry.arguments?.getString("audioUrl") ?: ""
             Log.d("MediaScreen", "Encode URL: $encodedUrl")
             MediaScreen(
                 modifier = Modifier,
-                backButton = { navController.popBackStack() },
-                audioUrl = encodedUrl
+                audioUrl = encodedUrl,
+                navigateToFiles = { navController.navigate(route) }
             )
         }
         composable("help") {
