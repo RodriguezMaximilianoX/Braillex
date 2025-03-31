@@ -2,6 +2,7 @@ package com.rmxdev.braillex.presenter.media
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,14 @@ fun MediaScreen(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBlack)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        viewModel.playPause()
+                        viewModel.updateButtonState("playPause")
+                    } // Doble toque para reproducir/pausar
+                )
+            }
             .pointerInput(Unit) {
                 detectTransformGestures { _, pan, _, _ ->
                     when {

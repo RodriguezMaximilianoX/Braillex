@@ -45,16 +45,26 @@ class MediaViewModel @Inject constructor(
     fun initializePlayer(audioUrl: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val publicidadAudioUrl = useCase()
-            val finalAudioUrl = publicidadAudioUrl ?: audioUrl
 
-            withContext(Dispatchers.Main){
-                val mediaItem = MediaItem.fromUri(audioUrl)
-                exoPlayer.setMediaItem(mediaItem)
-                exoPlayer.prepare()
+            withContext(Dispatchers.Main) {
+                exoPlayer.clearMediaItems() // Limpiar cualquier audio previo
+
+                val mediaItems = mutableListOf<MediaItem>()
+
+                // Agregar publicidad si existe
+                publicidadAudioUrl?.let {
+                    mediaItems.add(MediaItem.fromUri(it))
+                }
+
+                // Agregar el audio que el usuario quiere reproducir
+                mediaItems.add(MediaItem.fromUri(audioUrl))
+
+                // Establecer la lista de reproducción sin reproducir de inmediato
+                exoPlayer.setMediaItems(mediaItems)
+                exoPlayer.prepare() // Solo prepara, sin reproducir
 
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
-                        Log.d("ExoPlayer", "Hilo actual en onPlaybackStateChanged: ${Thread.currentThread().name}")
                         isPrepared.value = state == Player.STATE_READY
                         if (state == Player.STATE_ENDED) {
                             isPlaying.value = false
