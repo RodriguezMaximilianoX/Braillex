@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -98,7 +99,6 @@ fun InitialScreen(
                 Icon(
                     painterResource(id = R.drawable.ic_account), contentDescription = "Account",
                     modifier = Modifier
-                        .background(White)
                         .size(40.dp),
                     tint = Color.Unspecified
                 )
