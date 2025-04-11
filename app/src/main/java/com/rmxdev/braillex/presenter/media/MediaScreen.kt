@@ -50,7 +50,6 @@ fun MediaScreen(
     val isPrepared by remember { viewModel.isPrepared }
     val isPlaying by remember { viewModel.isPlaying }
     val text = if (isPlaying) "Pausar" else "Reproducir"
-    val iconPadding = if (isPlaying) 8.dp else 16.dp
 
     SideEffect {
         systemUiController.setStatusBarColor(color = statusBarColor)
@@ -164,7 +163,7 @@ fun MediaScreen(
                         viewModel.updateButtonState("playPause")
                     },
                     modifier = Modifier
-                        .padding(iconPadding)
+                        .padding(8.dp)
                         .size(100.dp)
 
                 ) {

@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name="com.rmxdev.MyApp"
@@ -32,7 +33,7 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
 
         <activity
-            android:name=".presenter.SplashScreenActivity"
+            android:name=".data.network.SplashScreenActivity"
             android:theme="@style/Theme.Braillex"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true">
