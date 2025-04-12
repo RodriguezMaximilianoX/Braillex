@@ -1,6 +1,5 @@
 package com.rmxdev.braillex.presenter.media
 
-import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,9 +31,11 @@ class MediaViewModel @Inject constructor(
     fun updateButtonState(action: String) {
         when (action) {
             "playPause" -> {
-                buttonState.intValue = if (isPlaying.value) R.drawable.pausebutton else R.drawable.playbutton
+                buttonState.intValue =
+                    if (isPlaying.value) R.drawable.pausebutton else R.drawable.playbutton
                 buttonDescription.value = "Play/Pause"
             }
+
             "home" -> {
                 buttonState.intValue = R.drawable.initialbutton
                 buttonDescription.value = "Ir al Inicio"
@@ -47,21 +48,22 @@ class MediaViewModel @Inject constructor(
             val publicidadAudioUrl = useCase()
 
             withContext(Dispatchers.Main) {
-                exoPlayer.clearMediaItems() // Limpiar cualquier audio previo
+                exoPlayer.clearMediaItems()
 
                 val mediaItems = mutableListOf<MediaItem>()
 
-                // Agregar publicidad si existe
                 publicidadAudioUrl?.let {
                     mediaItems.add(MediaItem.fromUri(it))
                 }
 
-                // Agregar el audio que el usuario quiere reproducir
                 mediaItems.add(MediaItem.fromUri(audioUrl))
 
-                // Establecer la lista de reproducción sin reproducir de inmediato
                 exoPlayer.setMediaItems(mediaItems)
-                exoPlayer.prepare() // Solo prepara, sin reproducir
+                exoPlayer.prepare()
+                exoPlayer.play() // 🔥 Inicia la reproducción automáticamente
+                isPlaying.value = true
+                buttonState.intValue = R.drawable.pausebutton // 🔁 Botón actualizado
+                buttonDescription.value = "Play/Pause"
 
                 exoPlayer.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
