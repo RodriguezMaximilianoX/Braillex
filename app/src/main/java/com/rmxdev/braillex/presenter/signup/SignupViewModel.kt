@@ -18,6 +18,7 @@ class SignupViewModel @Inject constructor(
     private val _signupState = MutableStateFlow<SignUpState>(SignUpState.Idle)
     val signupState: StateFlow<SignUpState> = _signupState
 
+
     fun registerUser(email: String, password: String){
         if(email.isNotBlank() && password.isNotBlank()){
             viewModelScope.launch(Dispatchers.IO) {

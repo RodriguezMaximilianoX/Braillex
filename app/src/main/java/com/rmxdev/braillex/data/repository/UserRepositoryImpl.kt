@@ -2,6 +2,7 @@ package com.rmxdev.braillex.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.rmxdev.braillex.domain.entities.User
 import com.rmxdev.braillex.domain.repository.UserRepository
 import kotlinx.coroutines.tasks.await
@@ -9,7 +10,8 @@ import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ): UserRepository {
 
     override suspend fun registerUser(email: String, password: String): Result<Unit> {
@@ -39,6 +41,32 @@ class UserRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception){
             Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteAccount() {
+        val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
+        val uid = user.uid
+
+        try {
+            // 1. Borrar documentos en Firestore
+            val userDocRef = firestore.collection("users").document(uid)
+            val filesQuery = firestore.collection("generated_files").whereEqualTo("userId", uid)
+
+            userDocRef.delete().await()
+            val filesSnapshot = filesQuery.get().await()
+            filesSnapshot.documents.forEach { it.reference.delete().await() }
+
+            // 2. Borrar archivos en Firebase Storage
+            val storageRef = storage.reference.child("pdfs/$uid")
+            val listResult = storageRef.listAll().await()
+            listResult.items.forEach { it.delete().await() }
+
+            // 3. Eliminar cuenta de FirebaseAuth
+            user.delete().await()
+
+        } catch (e: Exception) {
+            throw Exception("Error al eliminar la cuenta: ${e.message}", e)
         }
     }
 

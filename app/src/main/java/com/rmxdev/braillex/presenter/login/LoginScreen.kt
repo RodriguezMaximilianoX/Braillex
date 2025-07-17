@@ -1,6 +1,5 @@
 package com.rmxdev.braillex.presenter.login
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -146,7 +144,12 @@ fun LoginScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp)
                 .height(50.dp)
         ) {
-            Text(text = "Iniciar sesión", fontSize = 25.sp, color = White, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Iniciar sesión",
+                fontSize = 25.sp,
+                color = White,
+                fontWeight = FontWeight.Bold
+            )
         }
         TextButton(onClick = { navigateToEmail() }) {
             Text(text = "¿No tienes una cuenta?", fontSize = 20.sp, color = Blue)
@@ -156,14 +159,16 @@ fun LoginScreen(
             Text(text = "¿Necesitas ayuda?", fontSize = 15.sp, color = BarColor)
         }
 
-        when(loginState){
+        when (loginState) {
             is LoginState.Loading -> {
                 CircularProgressIndicator()
             }
+
             is LoginState.Success -> {
                 onLoginSuccess()
                 viewModel.resetState()
             }
+
             is LoginState.Error -> {
                 LaunchedEffect(loginState) {
                     Toast.makeText(
@@ -171,6 +176,7 @@ fun LoginScreen(
                     ).show()
                 }
             }
+
             else -> {}
         }
     }
