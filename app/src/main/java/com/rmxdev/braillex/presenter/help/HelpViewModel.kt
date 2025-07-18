@@ -24,11 +24,11 @@ class HelpViewModel @Inject constructor(
         auth.signOut()
         onSignOut()
     }
-    fun deleteAccount() {
+    fun deleteAccount(password: String) {
         viewModelScope.launch {
             _deleteAccountState.value = DeleteAccountState.Loading
             try {
-                deleteAccountUseCase()
+                deleteAccountUseCase(password)
                 _deleteAccountState.value = DeleteAccountState.Success
             } catch (e: Exception) {
                 _deleteAccountState.value = DeleteAccountState.Error(e.message ?: "Error desconocido")

@@ -1,5 +1,6 @@
 package com.rmxdev.braillex.data.repository
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -44,12 +45,18 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteAccount() {
+    override suspend fun deleteAccount(password: String) {
         val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
         val uid = user.uid
+        val email = user.email ?: throw Exception("Email no disponible")
 
         try {
-            // 1. Borrar documentos en Firestore
+            val credential = EmailAuthProvider.getCredential(email, password)
+
+            // Reautenticación
+            user.reauthenticate(credential).await()
+
+            // Borrar documentos en Firestore
             val userDocRef = firestore.collection("users").document(uid)
             val filesQuery = firestore.collection("generated_files").whereEqualTo("userId", uid)
 
@@ -57,12 +64,17 @@ class UserRepositoryImpl @Inject constructor(
             val filesSnapshot = filesQuery.get().await()
             filesSnapshot.documents.forEach { it.reference.delete().await() }
 
-            // 2. Borrar archivos en Firebase Storage
-            val storageRef = storage.reference.child("pdfs/$uid")
-            val listResult = storageRef.listAll().await()
-            listResult.items.forEach { it.delete().await() }
+            // Borrar archivos en Firebase Storage
+            val pdfsRef = storage.reference.child("pdfs/$uid")
+            val pdfsAudioRef = storage.reference.child("pdfsAudio/$uid")
 
-            // 3. Eliminar cuenta de FirebaseAuth
+            val pdfsResult = pdfsRef.listAll().await()
+            pdfsResult.items.forEach { it.delete().await() }
+
+            val pdfsAudioResult = pdfsAudioRef.listAll().await()
+            pdfsAudioResult.items.forEach { it.delete().await() }
+
+            // Eliminar cuenta Firebase Auth
             user.delete().await()
 
         } catch (e: Exception) {

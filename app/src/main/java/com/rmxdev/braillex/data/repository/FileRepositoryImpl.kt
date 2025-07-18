@@ -35,9 +35,10 @@ class FileRepositoryImpl @Inject constructor(
             }
 
             val fileId = UUID.randomUUID().toString()
+            val userId = auth.currentUser?.uid ?: throw Exception("Usuario no autenticado")
 
             // Subir el PDF
-            val pdfRef = storage.reference.child("pdfs/$fileId.pdf")
+            val pdfRef = storage.reference.child("pdfs/$userId/$fileId.pdf")
             pdfRef.putFile(fileUri).await()
             val pdfUrl = pdfRef.downloadUrl.await().toString()
 
@@ -78,13 +79,16 @@ class FileRepositoryImpl @Inject constructor(
         fileId: String,
         onComplete: (String) -> Unit
     ) {
+
+        val userId = auth.currentUser?.uid ?: throw Exception("Usuario no autenticado")
+
         if (!audioFile.exists() || audioFile.length() == 0L) {
             Log.e("AudioGeneration", "Error: El archivo de audio está vacío o no existe")
             onComplete("")
             return
         }
 
-        val audioRef = storage.reference.child("pdfsAudio/$fileId.mp3")
+        val audioRef = storage.reference.child("pdfsAudio/$userId/$fileId.mp3")
         audioRef.putFile(Uri.fromFile(audioFile)).addOnSuccessListener {
             audioRef.downloadUrl.addOnSuccessListener { audioDownloadUrl ->
                 onComplete(audioDownloadUrl.toString())
