@@ -1,5 +1,6 @@
 package com.rmxdev.braillex.data.repository
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.rmxdev.braillex.domain.repository.ReproductorRepository
@@ -9,7 +10,8 @@ import javax.inject.Singleton
 
 @Singleton
 class ReproductorRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth
 ) : ReproductorRepository {
 
     override suspend fun getTitle(fileId: String): Result<String> {
@@ -40,14 +42,20 @@ class ReproductorRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAudioFile(fileId: String): Result<Unit> {
         return try {
+
+            // Verificar si el usuario actual es el propietario del archivo
+            val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
+            val document = firestore.collection("generated_files").document(fileId).get().await()
+            val userId = document.getString("userId") ?: throw Exception("No se encontró el userId")
+
             // Eliminar el archivo PDF de Firebase Storage
             val pdfStorageRef =
-                FirebaseStorage.getInstance().reference.child("pdfs/${fileId}.pdf")
+                FirebaseStorage.getInstance().reference.child("pdfs/${userId}/${fileId}.pdf")
             pdfStorageRef.delete().await()
 
             // Eliminar el archivo de audio de Firebase Storage
             val audioStorageRef =
-                FirebaseStorage.getInstance().reference.child("pdfsAudio/${fileId}.mp3")
+                FirebaseStorage.getInstance().reference.child("pdfsAudio/${userId}/${fileId}.mp3")
             audioStorageRef.delete().await()
 
             // Eliminar el documento en Firestore
